@@ -18,7 +18,7 @@ return new class extends Migration
                 ->onDelete('cascade');
 
             $table->enum('estate_type' , ['land', 'apartment' , 'villa' , 'commercial shops' , 'warehouses' ,'commercial real estate' ]);
-            $table->enum('operation_type', ['sale','rent']);
+            $table->enum('operation_type', ['sell','rent']);
             $table->enum('status' , ['barebones'  , 'furnished']) ;
 
             $table->enum('governorate' , ['Aleppo','Al-Ḥasakah','Al-Qamishli','Al-Qunayṭirah','Al-Raqqah','Al-Suwayda','Damascus','Darʿa','Dayr al-Zawr','Ḥamah','Homs','Idlib','Latakia' , 'Rif Dimashq']);

@@ -17,10 +17,10 @@ return new class extends Migration
             $table->foreignId('owner_id')->constrained('users')
             ->onDelete('cascade');
 
-            $table->enum('operation_type' , ['sale' , 'rent']) ;
-            $table->enum('transmission_type' , ['auto', 'manual']) ;
-            $table->enum('driving_force' , ['four wheel' , 'normal']) ;
-            $table->enum('fuel_type' , ['gaz' ,'diesel']) ;
+            $table->enum('operation_type' , ['sell' , 'rent']) ;
+            $table->enum('transmission_type' , ['manually', 'automatic']) ;
+            $table->enum('driving_force' , ['4WD', 'FWD', 'RWD']) ;
+            $table->enum('fuel_type' , ['gasoline', 'diesel' , 'hybrid', 'electric']) ;
             $table->enum('status' , ['new' , 'used']) ;
 
             $table->enum('brand' , ['Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'BMW', 'Bentley', 'Bugatti', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 'Citroen', 'Cooper', 'Dacia', 'Daewoo',
