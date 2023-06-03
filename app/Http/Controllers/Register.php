@@ -263,7 +263,7 @@ class Register extends Controller
                 $NewfileName = $filename . '_' . time() . '_.' . $Extension;
 
                 //Upload Image
-                $path = $image->storeAs('images', $NewfileName);
+                $path = $image->storeAs('images', $NewfileName , 'public');
 
 
                 //create Object in Database

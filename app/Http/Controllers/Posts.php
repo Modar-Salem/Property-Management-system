@@ -38,7 +38,12 @@ class Posts extends Controller
                     'image1' => 'mimes:jpeg,jpg,png,gif' ,
                     'image2' => 'mimes:jpeg,jpg,png,gif' ,
                     'image3' => 'mimes:jpeg,jpg,png,gif' ,
-
+                    'image4' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image5' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image6' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image7' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image8' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image9' => 'mimes:jpeg,jpg,png,gif'
                 ]);
                 if ($validate->fails())
                     return response()->json([
@@ -171,7 +176,7 @@ class Posts extends Controller
             $Extension = $image->getClientOriginalExtension();
 
             //New_File_Name
-            $NewfileName = $filename . '_' . time() . '_ .' . $Extension;
+            $NewfileName = $filename . '_' . time() . '_.' . $Extension;
 
             //Upload Image
             $path = $image->storeAs('images', $NewfileName, 'public');
@@ -351,10 +356,10 @@ class Posts extends Controller
             $Extension = $image->getClientOriginalExtension();
 
             //New_File_Name
-            $NewfileName = $filename . '_' . time() . '_ .' . $Extension;
+            $NewfileName = $filename . '_' . time() . '_.' . $Extension;
 
             //Upload Image
-            $path = $image->storeAs('images', $NewfileName, 'public');
+            $path = $image->storeAs('images', $NewfileName , 'public');
 
 
             //create Object in Database
@@ -376,51 +381,50 @@ class Posts extends Controller
 
     public function Get_User_Cars($id)
     {
-        $user= User::find($id) ;
-        if ($user)
-        {
-            $WithImage = [] ;
-            foreach ($user->cars()->get() as $cars)
-            {
-                $car = Car::find($cars['id']) ;
-                $image = $car->images()->get() ;
-                array_push($WithImage , $image);
+        $user = User::find($id);
+
+        if ($user) {
+            $postsWithImages = [];
+            foreach ($user->cars()->get() as $car) {
+                $images = $car->images()->get();
+                $postWithImage = [
+                    'post' => $car,
+                    'images' => $images
+                ];
+                array_push($postsWithImages, $postWithImage);
             }
-
             return response()->json([
-                'Post'=> $user->cars()->get(),
-                'Image' =>  $WithImage
+                'posts' => $postsWithImages
             ]);
-
-        }
-        else
+        } else {
             return response()->json([
-                'Message' => 'User Not Exist'
-            ]) ;
+                'message' => 'User not found'
+            ]);
+        }
     }
 
     public function Get_User_Estates($id)
     {
-        $user= User::find($id) ;
+        $user = User::find($id);
 
-        if ($user)
-        {
-            $WithImage = [] ;
-            foreach ($user->estates()->get() as $estates)
-            {
-                $estate = Estate::find($estates['id']) ;
-                $image = $estate->images()->get() ;
-                array_push($WithImage , $image);
+        if ($user) {
+            $postsWithImages = [];
+            foreach ($user->estates()->get() as $estate) {
+                $images = $estate->images()->get();
+                $postWithImage = [
+                    'post' => $estate,
+                    'images' => $images
+                ];
+                array_push($postsWithImages, $postWithImage);
             }
             return response()->json([
-                'Post' => $user->estates()->get() ,
-                'Image' =>  $WithImage
+                'posts' => $postsWithImages
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'User not found'
             ]);
         }
-        else
-            return response()->json([
-                'Message' => 'User Not Exist'
-            ]) ;
     }
 
     public function remove_estate_posts($post_id)
