@@ -32,3 +32,7 @@ route::get('Remove_Car/{id}' , [\App\Http\Controllers\Posts::class , 'remove_car
 route::get('Estate_Home' , [\App\Http\Controllers\HomeController::class,'Estate_Home']) ;
 
 route::get('Car_Home' , [\App\Http\Controllers\HomeController::class,'Car_Home']) ;
+
+route::get('Get_Car/{id}' , [\App\Http\Controllers\Posts::class,'get_car']) ;
+
+route::get('Get_Estate/{id}' , [\App\Http\Controllers\Posts::class,'get_estate']) ;

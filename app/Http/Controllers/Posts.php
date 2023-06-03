@@ -486,5 +486,43 @@ class Posts extends Controller
         }
     }
 
+    public function get_car($car_id)
+    {
+        $car = Car::find($car_id) ;
+        if($car)
+        {
+            return \response()->json([
+                'Status' => true ,
+                'Car : ' => $car ,
+                'Images : ' => $car->images
+            ]) ;
+        }else
+        {
+            return \response()->json([
+                'Status' => false ,
+                'Car : ' => "Car Not exist"
+            ]) ;
+        }
+    }
+
+    public function get_estate($estate_id)
+    {
+        $estate = Estate::find($estate_id) ;
+        if($estate)
+        {
+            return \response()->json([
+                'Status' => true ,
+                'Estate : ' => $estate ,
+                'Images' => $estate->images
+            ]) ;
+        }else
+        {
+            return \response()->json([
+                'Status' => false ,
+                'Estate : ' => "Estate Not exist"
+            ]) ;
+        }
+    }
+
 
 }
