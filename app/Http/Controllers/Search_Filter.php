@@ -161,7 +161,7 @@ class Search_Filter extends Controller
             return response()->json([
                 'Status' => false ,
                 'Message' => $exception->getMessage()
-            ], 401) ;
+            ]) ;
         }
 
     }
@@ -223,7 +223,7 @@ class Search_Filter extends Controller
             return response()->json([
                 'Status' => false ,
                 'Message' => $exception->getMessage()
-            ], 401) ;
+            ]) ;
         }
     }
 }

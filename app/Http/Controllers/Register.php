@@ -32,7 +32,7 @@ class Register extends Controller
             return response() -> json([
                 'Status' => false  ,
                 'Error in Create the Token' => $exception->getMessage() ,
-            ] ,  500) ;
+            ] ) ;
         }
     }
 
@@ -63,7 +63,7 @@ class Register extends Controller
                 return response()->json([
                     'Status' => false,
                     'Validation Error' => $validate->errors()
-                ], 401);
+                ]);
 
 
             $User = \App\Models\User::create([
@@ -85,7 +85,7 @@ class Register extends Controller
                 return response() -> json([
                     'Status' => false  ,
                     'Error in Create the Token' => $Th->getMessage() ,
-                ] ,  500) ;
+                ] ) ;
             }
 
             if($request->hasFile('image'))
@@ -187,7 +187,7 @@ class Register extends Controller
             return response()->json([
                 'Status' => false ,
                 'Message' => $Th->getMessage()
-            ],500) ;
+            ]) ;
         }
     }
 
@@ -211,7 +211,7 @@ class Register extends Controller
             return  response()->json([
                 "Status" => true ,
                 "Message" => "LogOut Successfully"
-            ] , 201) ;
+            ] ) ;
         }
         catch(\Exception $exception)
         {

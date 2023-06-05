@@ -49,13 +49,13 @@ class Posts extends Controller
                     return response()->json([
                         'Status' => false,
                         'Validation Error' => $validate->errors()
-                    ], 401);
+                    ]);
             }
             catch (\Exception $exception ) {
                 return response()->json([
                     'Status' => false ,
                     'Message' => $exception->getMessage()
-                ], 401 ) ;
+                ] ) ;
             }
             // create product
 
@@ -154,7 +154,7 @@ class Posts extends Controller
             return response()->json([
                 'Status' => true ,
                 'Message' => $exception->getMessage()
-            ], 401) ;
+            ]) ;
         }
 
     }
@@ -233,13 +233,13 @@ class Posts extends Controller
                     return response()->json([
                         'Status' => false,
                         'Validation Error' => $validate->errors()
-                    ], 401);
+                    ]);
             }
             catch (\Exception $exception ) {
                 return response()->json([
                     'Status' => false ,
                     'Message' => $exception->getMessage()
-                ], 401 ) ;
+                ] ) ;
             }
             // create product
 
@@ -334,7 +334,7 @@ class Posts extends Controller
             return response()->json([
                 'Status' => true ,
                 'Message' => $exception->getMessage()
-            ], 401) ;
+            ]) ;
         }
 
     }
