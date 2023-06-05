@@ -5,19 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Estate;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class Search_Filter extends Controller
 {
+    public function paginate($items, $perPage = 4, $page = null)
+    {
+        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+        $total = count($items);
+        $currentpage = $page;
+        $offset = ($currentpage * $perPage) - $perPage;
+        $itemstoshow = collect($items)->slice($offset, $perPage)->all();
+        return new LengthAwarePaginator($itemstoshow, $total, $perPage);
+    }
 
     public function Filter(Request $request)
     {
         try
         {
 
-            $post = null ;
+
 
             if ($request['type'] == 'estate' )
             {
+                $post = \App\Models\Estate::all() ;
                 if ($request['estate_type'] != null)
                     $post = \App\Models\Estate::where('estate_type' , $request['estate_type']);
 
@@ -53,18 +65,31 @@ class Search_Filter extends Controller
                     $post =  $post->where('status' , $request['status']) ;
 
                 if($post)
+                {
+                    $postsWithImages = [] ;
+                    foreach ($post as $estate) {
+                        $images = $estate->images()->get();
+                        $postWithImage = [
+                            'post' => $estate,
+                            'images' => $images
+                        ];
+                        array_push($postsWithImages, $postWithImage);
+                    }
                     return response()->json([
                         'Status'=>true ,
-                        'PostsSeeder'=> $post->paginate(4)
+                        'Posts'=> $this->paginate($postsWithImages , 4)->toArray()
                     ],201) ;
 
+                }
             }
 
 
             if ($request['type'] == 'car' )
             {
+                $post = \App\Models\Car::all() ;
+
                 if ($request['operation_type'] != null)
-                    $post = \App\Models\Car::where('operation_type' , $request['operation_type']) ;
+                    $post = $post->where('operation_type' , $request['operation_type']) ;
 
                 if ($request['transmission_type'] != null)
                     $post =  $post->where('transmission_type' , $request['transmission_type']) ;
@@ -112,10 +137,23 @@ class Search_Filter extends Controller
                     $post = $post->where('kilometers' , '<' , $request['max_kilometers']) ;
 
                 if($post)
+                {
+                    $postsWithImages = [] ;
+                    foreach ($post as $car) {
+                        $images = $car->images()->get();
+                        $postWithImage = [
+                            'post' => $car,
+                            'images' => $images
+                        ];
+                        array_push($postsWithImages, $postWithImage);
+                    }
+
                     return response()->json([
-                        'Status'=>true ,
-                        'Posts'=> $post->paginate(4)
-                    ],201) ;
+                        'Status' => true,
+                        'Posts' => $this->paginate($postsWithImages , 4)->toArray()
+                    ], 201);
+                }
+
             }
         }
         catch (\Exception $exception){
@@ -134,22 +172,47 @@ class Search_Filter extends Controller
         {
              if ($request['type'] == 'car' )
             {
-                $post = Car::where('description' ,'like' ,'%'.$request['description'].'%') ->orWhere('address' ,'like' ,'%'.$request['description'].'%');
+                $post = Car::where('description' ,'like' ,'%'.$request['description'].'%') ->orWhere('address' ,'like' ,'%'.$request['description'].'%')->get();
                 if($post)
-                    return response()->json([
-                        'Status'=>true ,
-                        'Estates'=> $post->paginate(4),
+                {
+                    $postsWithImages = [] ;
 
-                    ],201) ;
+                    foreach ($post as $car) {
+                        $images = $car->images()->get();
+                        $postWithImage = [
+                            'post' => $car,
+                            'images' => $images
+                        ];
+                        array_push($postsWithImages, $postWithImage);
+                    }
+
+                    return response()->json([
+                        'Status' => true,
+                        'Car' => $this ->paginate($postsWithImages, 4)->toArray()
+                    ], 201);
+                }
             }
             if ($request['type'] == 'estate' )
             {
-                $post = Estate::where('description' ,'like' ,'%'.$request['description'].'%')->orWhere('address' ,'like' ,'%'.$request['description'].'%');
+                $post = Estate::where('description' ,'like' ,'%'.$request['description'].'%')->orWhere('address' ,'like' ,'%'.$request['description'].'%')->get();
                 if($post)
+                {
+                    $postsWithImages = [] ;
+
+                    foreach ($post as $estate) {
+                        $images = $estate->images()->get();
+                        $postWithImage = [
+                            'post' => $estate,
+                            'images' => $images
+                        ];
+                        array_push($postsWithImages, $postWithImage);
+                    }
+
                     return response()->json([
-                        'Status'=>true ,
-                        'Estates'=> $post->paginate(4)
-                    ],201) ;
+                        'Status' => true,
+                        'Estates' => $this ->paginate($postsWithImages, 4)->toArray()
+                    ], 201);
+                }
             }
 
 

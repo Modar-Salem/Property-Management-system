@@ -159,7 +159,7 @@ class Register extends Controller
                 return response()->json([
                     'Status' => false ,
                     'Validation Error' => $validate->errors()
-                ],401) ;
+                ]) ;
 
 
             if (!Auth::attempt($request->only('email' , 'password' )))
@@ -178,7 +178,7 @@ class Register extends Controller
                     'Status'=> true ,
                     'User' => $User,
                     'Token' => $token ,
-                ], 201) ;
+                ]) ;
 
             }
         }
@@ -281,7 +281,7 @@ class Register extends Controller
                 return response()->json([
                     'Status' => false,
                     'Message' => $exception->getMessage()
-                ], 401);
+                ]);
             }
         }
 
