@@ -36,3 +36,11 @@ route::get('Car_Home' , [\App\Http\Controllers\HomeController::class,'Car_Home']
 route::get('Get_Car/{id}' , [\App\Http\Controllers\Posts::class,'get_car']) ;
 
 route::get('Get_Estate/{id}' , [\App\Http\Controllers\Posts::class,'get_estate']) ;
+
+Route::post('Give_Rate' , [\App\Http\Controllers\Posts::class , 'rate']) ;
+
+Route::get('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
+
+Route::post('Add_To_Favorite' , [\App\Http\Controllers\Posts::class , 'Add_To_Favorite']) ;
+
+Route::get('Get_All_Favorite' , [\App\Http\Controllers\Posts::class , 'Get_All_Favorite']) ;

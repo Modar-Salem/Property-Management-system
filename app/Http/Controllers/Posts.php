@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\Image;
+use App\Models\Rate;
 use App\Models\User;
 use http\Env\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
@@ -420,7 +422,8 @@ class Posts extends Controller
             return response()->json([
                 'posts' => $postsWithImages
             ]);
-        } else {
+        } else
+        {
             return response()->json([
                 'message' => 'User not found'
             ]);
@@ -437,7 +440,9 @@ class Posts extends Controller
                 'Message' => 'Post Not Exist'
             ]) ;
         }
+
         $owner_id  = $post['owner_id'] ;
+
         try
         {
             if ($owner_id == Auth::id() or \auth()->user()->role = 'admin')
@@ -498,7 +503,8 @@ class Posts extends Controller
             return \response()->json([
                 'Status' => true ,
                 'Car : ' => $car ,
-                'Images : ' => $car->images
+                'Images : ' => $car->images ,
+                'Owner : ' => $car->owner
             ]) ;
         }else
         {
@@ -517,7 +523,8 @@ class Posts extends Controller
             return \response()->json([
                 'Status' => true ,
                 'Estate : ' => $estate ,
-                'Images' => $estate->images
+                'Images' => $estate->images ,
+                'Owner : ' => $estate->owner
             ]) ;
         }else
         {
@@ -528,5 +535,224 @@ class Posts extends Controller
         }
     }
 
+    /**
+     * give a rate to the product
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function Rate(Request $request)
+    {
+        try
+        {
+            $validate = Validator::make($request->all() ,
+                [
+                    'rate' => 'Required | min :1 | max :5 |integer ',
+                ]) ;
+
+            if($validate->fails())
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => $validate->errors()
+                ]) ;
+            }
+
+            $user_id = Auth::id() ;
+
+            if($request['type'] == 'estate')
+                Rate::updateOrCreate([
+                    'user_id'=> $user_id
+                ],
+                    [
+                        'rate' => $request['rate'] ,
+                        'estate_id' => $request['estate_id'],
+                        'property_type' => 'estate'
+                    ]) ;
+            else if($request['type'] == 'car')
+                Rate::updateOrCreate([
+                    'user_id'=> $user_id
+                ],
+                    [
+                        'rate' => $request['rate'] ,
+                        'car_id' => $request['car_id'] ,
+                        'property_type' => $request['property_type']
+                    ]) ;
+
+            return response()->json([
+                'status' => true ,
+                'Message' => 'rated Successfully'
+            ]) ;
+
+
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
+        }
+
+
+    }
+
+    /**
+     * give a rate to the product
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function Get_Rate(Request $request){
+        try
+        {
+            $sum = 0  ;
+            $count = 0 ;
+
+            if($request['type'] == 'estate')
+            {
+                $count = Rate::where('estate_id', '=', $request['estate_id'])->count() ;
+                $sum = Rate::where('estate_id', '=', $request['estate_id'])->sum('rate') ;
+            }
+
+            else if($request['type'] == 'car')
+            {
+                $count = Rate::where('car_id', '=', $request['car_id'])->count() ;
+                $sum = Rate::where('car_id', '=', $request['car_id'])->sum('rate') ;
+            }
+
+            return response()->json([
+                'Status' => true ,
+                'rate' => $sum/$count
+            ]) ;
+
+
+        }catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
+
+        }
+    }
+
+
+
+    public function Get_All_Favorite(Request $request)
+    {
+        try
+        {
+            $user_id = Auth::id() ;
+            if($request['type'] == 'estate')
+            {
+                $Estates = DB::table('estates')
+                    ->join('favorites', 'estates.id', '=', 'favorites.estate_id')
+                    ->where('favorites.user_id', '=', $user_id)
+                    ->get();
+
+                return response()->json([
+                    'favorite_estates : ' => $Estates
+                ]) ;
+            }else if($request['type'] == 'car')
+            {
+                $Cars = DB::table('cars')
+                    ->join('favorites', 'cars.id', '=', 'favorites.car_id')
+                    ->where('favorites.user_id', '=', $user_id)
+                    ->get();
+
+                return response()->json([
+                    'favorite_cars : ' => $Cars
+                ]) ;
+
+            }else if($request['type'] == 'all')
+            {
+                $Estates = DB::table('estates')
+                    ->join('favorites', 'estates.id', '=', 'favorites.estate_id')
+                    ->where('favorites.user_id', '=', $user_id)
+                    ->get();
+
+                $Cars = DB::table('cars')
+                    ->join('favorites', 'cars.id', '=', 'favorites.car_id')
+                    ->where('favorites.user_id', '=', $user_id)
+                    ->get();
+
+                return response()->json([
+                    'favorites Estate: ' => $Estates ,
+                    'favorites Car: ' => $Cars ,
+                ]) ;
+
+            }
+
+
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status'=>false ,
+                'Message'=>$exception->getMessage()
+            ]) ;
+        }
+    }
+
+    /**
+     * Add the specified resource to favorite.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function Add_To_Favorite(Request $request)
+    {
+        try
+        {
+            $user_id = Auth::id() ;
+            if($request['type'] == 'estate')
+                $favorite = \App\Models\Favorite::where('user_id' , $user_id)->where('estate_id' , '=' ,  $request['id']);
+
+            else if($request['type'] == 'car')
+                $favorite = \App\Models\Favorite::where('user_id' , $user_id)->where('car_id' , '=' ,  $request['id']);
+
+
+            if ($favorite->first())
+            {
+                $favorite->delete() ;
+                return response()->json([
+                    'Status'=>true ,
+                    'Message' => 'product un favorite'
+                ]) ;
+            }
+            else
+            {
+                $user_id = Auth::id();
+
+                if($request['type'] == 'estate')
+                    \App\Models\Favorite::create([
+                        'estate_id' => $request['id'],
+                        'user_id' => $user_id ,
+                        'property_type' => 'estate'
+                    ]);
+
+                if($request['type'] == 'car')
+                    \App\Models\Favorite::create([
+                        'car_id' => $request['id'],
+                        'user_id' => $user_id ,
+                        'property_type' => 'car'
+                    ]);
+
+                return response()->json([
+                    'Status' => true,
+                    'Message' => 'product favorite'
+                ]);
+
+
+            }
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status'=>false ,
+                'Message'=>$exception->getMessage()
+            ]) ;
+        }
+
+    }
 
 }
