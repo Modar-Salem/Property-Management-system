@@ -559,26 +559,40 @@ class Posts extends Controller
             }
 
             $user_id = Auth::id() ;
-
             if($request['type'] == 'estate')
-                Rate::updateOrCreate([
-                    'user_id'=> $user_id
-                ],
-                    [
-                        'rate' => $request['rate'] ,
-                        'estate_id' => $request['estate_id'],
-                        'property_type' => 'estate'
-                    ]) ;
-            else if($request['type'] == 'car')
-                Rate::updateOrCreate([
-                    'user_id'=> $user_id
-                ],
-                    [
-                        'rate' => $request['rate'] ,
-                        'car_id' => $request['car_id'] ,
-                        'property_type' => $request['property_type']
-                    ]) ;
+            {
+                $estate = Estate::find($request['estate_id']) ;
 
+                if($estate)
+                    Rate::updateOrCreate([
+                        'user_id' => $user_id
+                    ],
+                        [
+                            'rate' => $request['rate'],
+                            'estate_id' => $request['estate_id'],
+                            'property_type' => 'estate'
+                        ]);
+                else
+                    return response()->json([
+                        'Message' => 'Estate Not Exist'
+                    ]) ;
+            }
+            else if($request['type'] == 'car') {
+                $car = Car::find($request['car_id']) ;
+                if($car)
+                    Rate::updateOrCreate([
+                    'user_id' => $user_id
+                   ],
+                    [
+                        'rate' => $request['rate'],
+                        'car_id' => $request['car_id'],
+                        'property_type' => 'car'
+                    ]);
+                else
+                    return response()->json([
+                        'Message' => 'Car Not Exist'
+                    ]) ;
+            }
             return response()->json([
                 'status' => true ,
                 'Message' => 'rated Successfully'
@@ -704,12 +718,26 @@ class Posts extends Controller
         try
         {
             $user_id = Auth::id() ;
-            if($request['type'] == 'estate')
-                $favorite = \App\Models\Favorite::where('user_id' , $user_id)->where('estate_id' , '=' ,  $request['id']);
 
+            if($request['type'] == 'estate') {
+                $estate = Estate::find($request['id']) ;
+                if($estate)
+                    $favorite = \App\Models\Favorite::where('user_id', $user_id)->where('estate_id', '=', $request['id']);
+                else
+                    return response()->json([
+                        'Message' => 'Estate Not Exist'
+                    ]) ;
+            }
             else if($request['type'] == 'car')
-                $favorite = \App\Models\Favorite::where('user_id' , $user_id)->where('car_id' , '=' ,  $request['id']);
-
+            {
+                $car = Car::find($request['id']) ;
+                if($car)
+                    $favorite = \App\Models\Favorite::where('user_id', $user_id)->where('car_id', '=', $request['id']);
+                else
+                    return response()->json([
+                        'Message' => 'Car Not Exist'
+                    ]) ;
+            }
 
             if ($favorite->first())
             {
@@ -755,4 +783,44 @@ class Posts extends Controller
 
     }
 
+    public function update_post(Request $request)
+    {
+        $user_id = Auth::id() ;
+        if($request['type'] == 'car')
+        {
+            $car = Car::find($request['id']) ;
+            if($car)
+            {
+                if($car['owner_id'] == $user_id)
+                    $car->update($request->all());
+                else
+                    return response()->json([
+                        'Message' => 'Access denied'
+                    ]) ;
+            }
+            else
+                return response()->json([
+                    'Message' => 'Car Not Exist'
+                ]) ;
+
+        }else if($request['type'] == 'estate')
+        {
+            $estate = Estate::find($request['id']) ;
+            if($estate)
+            {
+                if($estate['owner_id'] == $user_id)
+                    $estate->update($request->all());
+                else
+                    return response()->json([
+                        'Message' => 'Access denied'
+                    ]) ;
+            }
+            else
+                return response()->json([
+                    'Message' => 'Estate Not Exist'
+                ]) ;
+
+        }
+        return null ;
+    }
 }

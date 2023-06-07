@@ -44,3 +44,5 @@ Route::get('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
 Route::post('Add_To_Favorite' , [\App\Http\Controllers\Posts::class , 'Add_To_Favorite']) ;
 
 Route::get('Get_All_Favorite' , [\App\Http\Controllers\Posts::class , 'Get_All_Favorite']) ;
+
+Route::post('Update_Post' , [\App\Http\Controllers\Posts::class , 'update_post']) ;
