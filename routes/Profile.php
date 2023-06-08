@@ -20,4 +20,5 @@ route::post('Insert_Image' , [\App\Http\Controllers\Register::class , 'insert_im
 
 route::get('GetUser/{id}' , [\App\Http\Controllers\Register::class , 'GetUser']) ;
 
+route::get('profile' , [\App\Http\Controllers\Register::class , 'profile']) ;
 

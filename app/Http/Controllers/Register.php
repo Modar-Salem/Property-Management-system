@@ -13,6 +13,25 @@ use Illuminate\Support\Facades\Validator;
 class Register extends Controller
 {
 
+    public function profile()
+    {
+        try {
+            $id = Auth::id() ;
+            $user = User::find($id) ;
+
+            return response()->json([
+                'User' => $user
+            ]) ;
+
+        } catch (\Exception $exception)
+        {
+            return response() -> json([
+                'Status' => false  ,
+                'Error in  Token' => $exception->getMessage() ,
+            ] ) ;
+        }
+    }
+
     public function GetUser($id)
     {
         try {
