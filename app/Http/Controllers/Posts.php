@@ -214,7 +214,7 @@ class Posts extends Controller
 
                 $validate = Validator::make($request->all(), [
                     'operation_type' => 'required',
-                    'location'=>'required',
+                    'governorate'=>'required',
                     'description'=>'required',
                     'price'=>'required',
                     'space' => 'required' ,
@@ -229,7 +229,7 @@ class Posts extends Controller
                     'image7' => 'mimes:jpeg,jpg,png,gif' ,
                     'image8' => 'mimes:jpeg,jpg,png,gif' ,
                     'image9' => 'mimes:jpeg,jpg,png,gif' ,
-                    'locationInDamascus'
+
                 ]);
                 if ($validate->fails())
                     return response()->json([
@@ -253,7 +253,7 @@ class Posts extends Controller
                 $estate = \App\Models\Estate::create([
                     'owner_id'=> $id,
                     'operation_type' => $request['operation_type'],
-                    'location'=> $request['location'],
+                    'governorate'=> $request['governorate'],
                     'locationInDamascus'=> $request['locationInDamascus'],
                     'description'=> $request['description'],
                     'price'=> $request['price'],
@@ -263,7 +263,8 @@ class Posts extends Controller
                     'level' => $request['level'] ,
                     'baths' => $request ['baths'] ,
                     'garage' => $request ['garage'] ,
-                    'status' => $request ['status']
+                    'status' => $request ['status'] ,
+                    'address' => $request['address']
                 ]) ;
 
                 if ($request->hasFile('image'))
