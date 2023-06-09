@@ -44,7 +44,6 @@ class HomeController extends Controller
 
 
             $postsWithImages = [];
-            $relatedPosts = collect([]);
 
             foreach ($favorites_location as $favorite) {
                 $relatedPosts [] = Estate::where('governorate', $favorite->location)->get() ;
@@ -58,8 +57,6 @@ class HomeController extends Controller
                 }
             }
 
-            $paginatedRelatedPosts = $this->paginate($postsWithImages, 4)->toArray();
-
             $Top_Rating_Posts = DB::table('rates')
                 ->join('estates', 'rates.estate_id', '=', 'estates.id')
                 ->where('rates.property_type', '=', 'estate')
@@ -68,36 +65,30 @@ class HomeController extends Controller
                 ->orderByDesc('average_rate')
                 ->get() ;
 
-            $postsWithImages2 = [] ;
             foreach ($Top_Rating_Posts as $estate) {
                 $images = $estate->images()->get();
                 $postWithImage = [
                     'post' => $estate,
                     'images' => $images
                 ];
-                array_push($postsWithImages2, $postWithImage);
+                array_push($postsWithImages, $postWithImage);
             }
-
-            $paginatedTopRatingPosts = $this->paginate($postsWithImages2, 4)->toArray();
 
 
             $All_Estate = Estate::all() ;
 
-            $postsWithImages3 = [] ;
             foreach ($All_Estate as $estate) {
                 $images = $estate->images()->get();
                 $postWithImage = [
                     'post' => $estate,
                     'images' => $images
                 ];
-                array_push($postsWithImages3, $postWithImage);
+                array_push($postsWithImages, $postWithImage);
             }
 
-            $paginate_all = $this->paginate($postsWithImages3 , 4)->toArray() ;
+            $paginate_all = $this->paginate($postsWithImages , 4)->toArray() ;
 
             return response()->json([
-                'related posts' => $paginatedRelatedPosts,
-                'Top Rating' => $paginatedTopRatingPosts ,
                  'AllPost' => $paginate_all
             ]);
 
@@ -120,7 +111,6 @@ class HomeController extends Controller
                 ->select('cars.governorate')
                 ->get();
 
-            $relatedPosts = collect([]);
             $postsWithImages1 = [];
 
             foreach ($favorites_location as $favorite) {
@@ -134,8 +124,6 @@ class HomeController extends Controller
                     array_push($postsWithImages1, $postWithImage);
                 }
             }
-            $paginatedRelatedPosts = $this->paginate($postsWithImages1, 4)->toArray();
-
 
             $Top_Rating_Posts = DB::table('rates')
                 ->join('cars', 'rates.car_id', '=', 'cars.id')
@@ -145,35 +133,29 @@ class HomeController extends Controller
                 ->orderByDesc('average_rate')
                 ->get();
 
-            $postsWithImages2 = [] ;
             foreach ($Top_Rating_Posts as $car) {
                 $images = $car->images()->get();
                 $postWithImage = [
                     'post' => $car,
                     'images' => $images
                 ];
-                array_push($postsWithImages2, $postWithImage);
+                array_push($postsWithImages1, $postWithImage);
             }
-
-            $paginatedTopRatingPosts = $this->paginate($postsWithImages2, 4)->toArray();
 
             $All_Car = Car::all() ;
 
-            $postsWithImages3 = [] ;
             foreach ($All_Car as $car) {
                 $images = $car->images()->get();
                 $postWithImage = [
                     'post' => $car,
                     'images' => $images
                 ];
-                array_push($postsWithImages3, $postWithImage);
+                array_push($postsWithImages1, $postWithImage);
             }
 
-            $paginate_all = $this->paginate($postsWithImages3 , 4)->toArray() ;
+            $paginate_all = $this->paginate($postsWithImages1 , 4)->toArray() ;
 
             return response()->json([
-                'related Products' => $paginatedRelatedPosts,
-                'Top Rating' => $paginatedTopRatingPosts ,
                 'All_Post' => $paginate_all
             ]);
 
