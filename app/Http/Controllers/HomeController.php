@@ -28,8 +28,11 @@ class HomeController extends Controller
         $currentpage = $page;
         $offset = ($currentpage * $perPage) - $perPage;
         $itemstoshow = collect($items)->slice($offset, $perPage)->all();
-        return new LengthAwarePaginator($itemstoshow, $total, $perPage);
+        return new LengthAwarePaginator($itemstoshow, $total, $perPage, $page);
+
     }
+
+
 
     public function Estate_Home()
     {
@@ -46,14 +49,14 @@ class HomeController extends Controller
             $postsWithImages = [];
 
             foreach ($favorites_location as $favorite) {
-                $relatedPosts [] = Estate::where('governorate', $favorite->location)->get() ;
+                $relatedPosts [] = Estate::where('governorate', $favorite->governorate)->get() ;
                 foreach ($relatedPosts as $estate) {
                     $images = $estate->images()->get();
                     $postWithImage = [
                         'post' => $estate,
                         'images' => $images
                     ];
-                    array_push($postsWithImages, $postWithImage);
+                    array_push($postsWithImages, (object)$postWithImage);
                 }
             }
 
@@ -71,7 +74,7 @@ class HomeController extends Controller
                     'post' => $estate,
                     'images' => $images
                 ];
-                array_push($postsWithImages, $postWithImage);
+                array_push($postsWithImages, (object) $postWithImage);
             }
 
 
@@ -83,14 +86,20 @@ class HomeController extends Controller
                     'post' => $estate,
                     'images' => $images
                 ];
-                array_push($postsWithImages, $postWithImage);
+                array_push($postsWithImages, (object) $postWithImage);
             }
 
-            $paginate_all = $this->paginate($postsWithImages , 4)->toArray() ;
+            $paginate_all = $this->paginate($postsWithImages, 4)->toArray();
+
+            if ($paginate_all['current_page']  != 1) {
+                $paginate_all['data'] = array($paginate_all['data']) ;
+            }
+
 
             return response()->json([
-                 'AllPost' => $paginate_all
+                'AllPost' => $paginate_all
             ]);
+
 
         } catch (\Throwable $exception) {
             return response()->json([
@@ -154,6 +163,10 @@ class HomeController extends Controller
             }
 
             $paginate_all = $this->paginate($postsWithImages1 , 4)->toArray() ;
+
+            if ($paginate_all['current_page']  != 1) {
+                $paginate_all['data'] = array($paginate_all['data']) ;
+            }
 
             return response()->json([
                 'All_Post' => $paginate_all

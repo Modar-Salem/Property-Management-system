@@ -24,9 +24,6 @@ class Search_Filter extends Controller
     {
         try
         {
-
-
-
             if ($request['type'] == 'estate' )
             {
                 $post = \App\Models\Estate::all() ;
@@ -75,9 +72,13 @@ class Search_Filter extends Controller
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
+                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
+                    if ($All_post ['current_page']  != 1) {
+                        $All_post['data'] = array($All_post['data']) ;
+                    }
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $this->paginate($postsWithImages , 4)->toArray()
+                        'Posts'=> $All_post
                     ],201) ;
 
                 }
@@ -148,10 +149,15 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
+                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
+                    if ($All_post ['current_page']  != 1) {
+                        $All_post['data'] = array($All_post['data']) ;
+                    }
                     return response()->json([
-                        'Status' => true,
-                        'Posts' => $this->paginate($postsWithImages , 4)->toArray()
-                    ], 201);
+                        'Status'=>true ,
+                        'Posts'=> $All_post
+                    ],201) ;
+
                 }
 
             }
@@ -186,10 +192,15 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
+                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
+                    if ($All_post ['current_page']  != 1) {
+                        $All_post['data'] = array($All_post['data']) ;
+                    }
                     return response()->json([
-                        'Status' => true,
-                        'Car' => $this ->paginate($postsWithImages, 4)->toArray()
-                    ], 201);
+                        'Status'=>true ,
+                        'Posts'=> $All_post
+                    ],201) ;
+
                 }
             }
             if ($request['type'] == 'estate' )
@@ -208,10 +219,14 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
+                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
+                    if ($All_post ['current_page']  != 1) {
+                        $All_post['data'] = array($All_post['data']) ;
+                    }
                     return response()->json([
-                        'Status' => true,
-                        'Estates' => $this ->paginate($postsWithImages, 4)->toArray()
-                    ], 201);
+                        'Status'=>true ,
+                        'Posts'=> $All_post
+                    ],201) ;
                 }
             }
 
