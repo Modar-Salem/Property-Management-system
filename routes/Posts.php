@@ -23,6 +23,8 @@ route::post('Add_Cars', [\App\Http\Controllers\Posts::class , 'store_car']) ;
 
 route::get('Get_User_Estate/{id}' ,[\App\Http\Controllers\Posts::class , 'Get_User_Estates'] ) ;
 
+route::post('Likes_number', [\App\Http\Controllers\Posts::class , 'Likes_number']) ;
+
 route::get('Get_User_Cars/{id}' ,[\App\Http\Controllers\Posts::class , 'Get_User_Cars'] ) ;
 
 route::get('Remove_Estate/{id}' , [\App\Http\Controllers\Posts::class , 'remove_estate_posts']) ;

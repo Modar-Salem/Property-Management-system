@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\Estate;
+use App\Models\Favorite;
 use App\Models\Image;
 use App\Models\Rate;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Event\Code\Throwable;
 
 class Posts extends Controller
 {
@@ -138,7 +140,7 @@ class Posts extends Controller
                 return response() ->json([
                     'Status' => true ,
                     'Car'=> $Car,
-                    'Images' => $Car->images()->get()
+                    'images' => $Car->images()->get()
                 ],201) ;
 
             }
@@ -319,7 +321,7 @@ class Posts extends Controller
                 return response() ->json([
                     'Status' => true ,
                     'estate'=> $estate,
-                    'Images' => $estate->images()->get()
+                    'images' => $estate->images()->get()
                 ],201) ;
 
             }
@@ -504,7 +506,7 @@ class Posts extends Controller
             return \response()->json([
                 'Status' => true ,
                 'Car : ' => $car ,
-                'Images : ' => $car->images ,
+                'images : ' => $car->images ,
                 'Owner : ' => $car->owner
             ]) ;
         }else
@@ -524,7 +526,7 @@ class Posts extends Controller
             return \response()->json([
                 'Status' => true ,
                 'Estate : ' => $estate ,
-                'Images' => $estate->images ,
+                'images' => $estate->images ,
                 'Owner : ' => $estate->owner
             ]) ;
         }else
@@ -783,45 +785,92 @@ class Posts extends Controller
         }
 
     }
+    public function Likes_number(Request $request)
+    {
+        try
+        {
+            if($request['type'] == 'car')
+            {
+                $car = Car::find($request['id']) ;
+                if ($car)
+                {
+                    $count = Favorite::where('car_id' , $request['id'])->count() ;
+                    return \response()->json([
+                        'Likes_number' => $count
+                    ]);
+                }else
+                {
+                    return \response()->json(
+                     [
+                         'Message' => 'Car Not Exist'
+                     ]) ;
+                }
+            }else if ($request['type']== 'estate')
+            {
+                $estate = Estate::find($request['id']) ;
+                if ($estate)
+                {
+                    $count = Favorite::where('estate_id' , $request['id'])->count() ;
+                    return \response()->json([
+                        'Likes_number' => $count
+                    ]);
+                }else
+                {
+                    return \response()->json(
+                        [
+                            'Message' => 'estate Not Exist'
+                        ]) ;
+                }
+            }
+        }catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ] ) ;
+        }
+    }
 
     public function update_post(Request $request)
     {
-        $user_id = Auth::id() ;
-        if($request['type'] == 'car')
-        {
-            $car = Car::find($request['id']) ;
-            if($car)
-            {
-                if($car['owner_id'] == $user_id)
-                    $car->update($request->all());
-                else
+        try{
+            $user_id = Auth::id();
+            if ($request['type'] == 'car') {
+                $car = Car::find($request['id']);
+                if ($car) {
+                    if ($car['owner_id'] == $user_id)
+                        $car->update($request->all());
+                    else
+                        return response()->json([
+                            'Message' => 'Access denied'
+                        ]);
+                } else
                     return response()->json([
-                        'Message' => 'Access denied'
-                    ]) ;
-            }
-            else
-                return response()->json([
-                    'Message' => 'Car Not Exist'
-                ]) ;
+                        'Message' => 'Car Not Exist'
+                    ]);
 
-        }else if($request['type'] == 'estate')
-        {
-            $estate = Estate::find($request['id']) ;
-            if($estate)
-            {
-                if($estate['owner_id'] == $user_id)
-                    $estate->update($request->all());
-                else
+            } else if ($request['type'] == 'estate') {
+                $estate = Estate::find($request['id']);
+                if ($estate) {
+                    if ($estate['owner_id'] == $user_id)
+                        $estate->update($request->all());
+                    else
+                        return response()->json([
+                            'Message' => 'Access denied'
+                        ]);
+                } else
                     return response()->json([
-                        'Message' => 'Access denied'
-                    ]) ;
-            }
-            else
-                return response()->json([
-                    'Message' => 'Estate Not Exist'
-                ]) ;
+                        'Message' => 'Estate Not Exist'
+                    ]);
 
+            }
+            return null;
+        }catch(\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
         }
-        return null ;
     }
 }

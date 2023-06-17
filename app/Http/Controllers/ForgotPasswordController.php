@@ -37,7 +37,7 @@ class ForgotPasswordController extends Controller
         return response()->json([
             'Status'=>true,
             'Message'=>trans('code.sent')
-            ]);
+        ]);
     }
     public function userCheckCode(Request $request){
 
@@ -50,7 +50,7 @@ class ForgotPasswordController extends Controller
                 'ErrorMessage'=>$validator->errors()]);
         }
 
-         $validator->validated();
+        $validator->validated();
         //find the code
         $PasswordReset=ResetCodePassword::query()->firstWhere('code',$request['code']);
         //check if it is not expired:the time is one hour

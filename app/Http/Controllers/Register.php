@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use PHPUnit\Event\Code\Throwable ;
+
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class Register extends Controller
 {
@@ -383,5 +384,18 @@ class Register extends Controller
                 'Message' => $exception->getMessage()
             ]) ;
         }
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json(['error' => 'Old password is incorrect.'], 422);
+        }
+
+        $user->updatePassword($request->new_password);
+
+        return response()->json(['message' => 'Password has been updated.']);
     }
 }

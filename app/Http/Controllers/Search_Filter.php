@@ -10,15 +10,6 @@ use Illuminate\Pagination\Paginator;
 
 class Search_Filter extends Controller
 {
-    public function paginate($items, $perPage = 4, $page = null)
-    {
-        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
-        $total = count($items);
-        $currentpage = $page;
-        $offset = ($currentpage * $perPage) - $perPage;
-        $itemstoshow = collect($items)->slice($offset, $perPage)->all();
-        return new LengthAwarePaginator($itemstoshow, $total, $perPage);
-    }
 
     public function Filter(Request $request)
     {
@@ -72,13 +63,10 @@ class Search_Filter extends Controller
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
-                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
-                    if ($All_post ['current_page']  != 1) {
-                        $All_post['data'] = array($All_post['data']) ;
-                    }
+
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $All_post
+                        'Posts'=> $postsWithImages
                     ],201) ;
 
                 }
@@ -149,13 +137,9 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
-                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
-                    if ($All_post ['current_page']  != 1) {
-                        $All_post['data'] = array($All_post['data']) ;
-                    }
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $All_post
+                        'Posts'=> $postsWithImages
                     ],201) ;
 
                 }
@@ -192,13 +176,9 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
-                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
-                    if ($All_post ['current_page']  != 1) {
-                        $All_post['data'] = array($All_post['data']) ;
-                    }
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $All_post
+                        'Posts'=> $postsWithImages
                     ],201) ;
 
                 }
@@ -219,18 +199,12 @@ class Search_Filter extends Controller
                         array_push($postsWithImages, $postWithImage);
                     }
 
-                    $All_post = $this->paginate($postsWithImages , 4)->toArray() ;
-                    if ($All_post ['current_page']  != 1) {
-                        $All_post['data'] = array($All_post['data']) ;
-                    }
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $All_post
+                        'Posts'=> $postsWithImages
                     ],201) ;
                 }
             }
-
-
 
         }
         catch (\Exception $exception){

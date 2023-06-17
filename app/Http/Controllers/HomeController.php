@@ -21,43 +21,23 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
-    public function paginate($items, $perPage = 4, $page = null)
-    {
-        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
-        $total = count($items);
-        $currentpage = $page;
-        $offset = ($currentpage * $perPage) - $perPage;
-        $itemstoshow = collect($items)->slice($offset, $perPage)->all();
-        return new LengthAwarePaginator($itemstoshow, $total, $perPage, $page);
-
-    }
-
-
-
     public function Estate_Home()
     {
-        try {
+        try
+        {
             $user_id = Auth::id();
 
             $favorites_location = DB::table('favorites')
                 ->join('estates', 'favorites.estate_id', '=', 'estates.id')
                 ->where('favorites.user_id', '=', $user_id)
                 ->select('estates.governorate')
-                ->get() ;
+                ->get();
 
-
-            $postsWithImages = [];
+            $relatedPosts = collect();
 
             foreach ($favorites_location as $favorite) {
-                $relatedPosts [] = Estate::where('governorate', $favorite->governorate)->get() ;
-                foreach ($relatedPosts as $estate) {
-                    $images = $estate->images()->get();
-                    $postWithImage = [
-                        'post' => $estate,
-                        'images' => $images
-                    ];
-                    array_push($postsWithImages, (object)$postWithImage);
-                }
+                $posts = Estate::where('governorate', $favorite->governorate)->get();
+                $relatedPosts = $relatedPosts->merge($posts);
             }
 
             $Top_Rating_Posts = DB::table('rates')
@@ -66,40 +46,26 @@ class HomeController extends Controller
                 ->select('estate_id', DB::raw('AVG(rate) as average_rate'))
                 ->groupBy('estate_id')
                 ->orderByDesc('average_rate')
-                ->get() ;
+                ->get();
 
-            foreach ($Top_Rating_Posts as $estate) {
-                $images = $estate->images()->get();
-                $postWithImage = [
-                    'post' => $estate,
-                    'images' => $images
-                ];
-                array_push($postsWithImages, (object) $postWithImage);
+            foreach ($Top_Rating_Posts as $rating) {
+                $estate = Estate::find($rating->estate_id);
+                $relatedPosts->push($estate);
             }
 
+            $All_Estate = Estate::all();
 
-            $All_Estate = Estate::all() ;
+            $relatedPosts = $relatedPosts->merge($All_Estate);
 
-            foreach ($All_Estate as $estate) {
-                $images = $estate->images()->get();
-                $postWithImage = [
-                    'post' => $estate,
-                    'images' => $images
-                ];
-                array_push($postsWithImages, (object) $postWithImage);
-            }
-
-            $paginate_all = $this->paginate($postsWithImages, 4)->toArray();
-
-            if ($paginate_all['current_page']  != 1) {
-                $paginate_all['data'] = array($paginate_all['data']) ;
-            }
-
+            $perPage = 4;
+            $currentPage = Paginator::resolveCurrentPage() ?: 1;
+            $items = $relatedPosts->all();
+            $currentItems = array_slice($items, ($currentPage - 1) * $perPage, $perPage);
+            $relatedPosts = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
 
             return response()->json([
-                'AllPost' => $paginate_all
+                'AllPost' => $relatedPosts
             ]);
-
 
         } catch (\Throwable $exception) {
             return response()->json([
@@ -111,8 +77,7 @@ class HomeController extends Controller
 
     public function Car_Home()
     {
-        try
-        {
+        try {
             $user_id = Auth::id();
             $favorites_location = DB::table('favorites')
                 ->join('cars', 'favorites.car_id', '=', 'cars.id')
@@ -120,17 +85,17 @@ class HomeController extends Controller
                 ->select('cars.governorate')
                 ->get();
 
-            $postsWithImages1 = [];
+            $postsWithImages = collect();
 
             foreach ($favorites_location as $favorite) {
-                $relatedPosts[] = Car::where('governorate', $favorite['governorate'])->get();
-                foreach ($relatedPosts as $car) {
-                    $images = $car->images()->get();
+                $posts = Car::where('governorate', $favorite->governorate)->get();
+                foreach ($posts as $post) {
+                    $images = $post->images()->get();
                     $postWithImage = [
-                        'post' => $car,
+                        'post' => $post,
                         'images' => $images
                     ];
-                    array_push($postsWithImages1, $postWithImage);
+                    $postsWithImages->push($postWithImage);
                 }
             }
 
@@ -142,16 +107,17 @@ class HomeController extends Controller
                 ->orderByDesc('average_rate')
                 ->get();
 
-            foreach ($Top_Rating_Posts as $car) {
+            foreach ($Top_Rating_Posts as $rating) {
+                $car = Car::find($rating->car_id);
                 $images = $car->images()->get();
                 $postWithImage = [
                     'post' => $car,
                     'images' => $images
                 ];
-                array_push($postsWithImages1, $postWithImage);
+                $postsWithImages->push($postWithImage);
             }
 
-            $All_Car = Car::all() ;
+            $All_Car = Car::all();
 
             foreach ($All_Car as $car) {
                 $images = $car->images()->get();
@@ -159,25 +125,25 @@ class HomeController extends Controller
                     'post' => $car,
                     'images' => $images
                 ];
-                array_push($postsWithImages1, $postWithImage);
+                $postsWithImages->push($postWithImage);
             }
 
-            $paginate_all = $this->paginate($postsWithImages1 , 4)->toArray() ;
+                $perPage = 4;
+                $currentPage = Paginator::resolveCurrentPage() ?: 1;
+                $items = $postsWithImages->all();
+                $currentItems = array_slice($items, ($currentPage - 1) * $perPage, $perPage);
+                $postsWithImages = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
 
-            if ($paginate_all['current_page']  != 1) {
-                $paginate_all['data'] = array($paginate_all['data']) ;
+                return response()->json([
+                    'All_Post' => $postsWithImages
+                ]);
+
+            } catch (\Throwable $exception) {
+                return response()->json([
+                    'Status' => false,
+                    'Error Message' => $exception->getMessage(),
+                ]);
             }
-
-            return response()->json([
-                'All_Post' => $paginate_all
-            ]);
-
-        } catch (\Throwable $exception) {
-            return response()->json([
-                'Status' => false,
-                'Error Message' => $exception->getMessage(),
-            ]) ;
-        }
     }
 
 }
