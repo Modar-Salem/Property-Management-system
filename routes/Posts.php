@@ -41,7 +41,7 @@ route::get('Get_Estate/{id}' , [\App\Http\Controllers\Posts::class,'get_estate']
 
 Route::post('Give_Rate' , [\App\Http\Controllers\Posts::class , 'rate']) ;
 
-Route::get('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
+Route::post('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
 
 Route::post('Add_To_Favorite' , [\App\Http\Controllers\Posts::class , 'Add_To_Favorite']) ;
 
