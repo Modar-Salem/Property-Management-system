@@ -25,6 +25,7 @@ class HomeController extends Controller
     {
         try
         {
+            $postsWithImages =collect() ;
             $user_id = Auth::id();
 
             $favorites_location = DB::table('favorites')
@@ -33,11 +34,18 @@ class HomeController extends Controller
                 ->select('estates.governorate')
                 ->get();
 
-            $relatedPosts = collect();
+
 
             foreach ($favorites_location as $favorite) {
                 $posts = Estate::where('governorate', $favorite->governorate)->get();
-                $relatedPosts = $relatedPosts->merge($posts);
+                foreach ($posts as $post) {
+                    $images = $post->images()->get();
+                    $postWithImage = [
+                        'post' => $post,
+                        'images' => $images
+                    ];
+                    $postsWithImages->push($postWithImage);
+                }
             }
 
             $Top_Rating_Posts = DB::table('rates')
@@ -50,16 +58,28 @@ class HomeController extends Controller
 
             foreach ($Top_Rating_Posts as $rating) {
                 $estate = Estate::find($rating->estate_id);
-                $relatedPosts->push($estate);
+                $images = $estate->images()->get();
+                $postWithImage = [
+                    'post' => $estate,
+                    'images' => $images
+                ];
+                $postsWithImages->push($postWithImage);
             }
 
             $All_Estate = Estate::all();
 
-            $relatedPosts = $relatedPosts->merge($All_Estate);
+            foreach ($All_Estate as $estate) {
+                $images = $estate->images()->get();
+                $postWithImage = [
+                    'post' => $estate,
+                    'images' => $images
+                ];
+                $postsWithImages->push($postWithImage);
+            }
 
             $perPage = 4;
             $currentPage = Paginator::resolveCurrentPage() ?: 1;
-            $items = $relatedPosts->all();
+            $items = $postsWithImages->all();
             $currentItems = array_slice($items, ($currentPage - 1) * $perPage, $perPage);
             $relatedPosts = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
 

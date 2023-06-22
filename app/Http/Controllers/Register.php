@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Estate;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -397,5 +398,45 @@ class Register extends Controller
         $user->updatePassword($request->new_password);
 
         return response()->json(['message' => 'Password has been updated.']);
+    }
+
+    public function my_posts()
+    {
+        $id = Auth::id() ;
+
+        $user = User::find($id) ;
+        $carsWithImages = collect();
+        $estatesWithImages = collect();
+        foreach ($user->estates as $estate) {
+            $images = $estate->images()->get();
+            $postWithImage = [
+                'post' => $estate,
+                'images' => $images
+            ];
+            $estatesWithImages->push($postWithImage);
+        }
+        foreach ($user->cars as $cars) {
+            $images = $cars->images()->get();
+            $postWithImage = [
+                'post' => $cars,
+                'images' => $images
+            ];
+            $carsWithImages->push($postWithImage);
+        }
+
+        if($user)
+        {
+            return response() -> json([
+                'Status' => true ,
+                'Estates' => $estatesWithImages ,
+                'Cars' => $carsWithImages
+            ]);
+        }else
+        {
+            return response() -> json([
+                'Status' => true ,
+                'Message' => 'User Not Exist'
+            ]);
+        }
     }
 }

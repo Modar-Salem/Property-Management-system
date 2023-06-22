@@ -23,3 +23,5 @@ route::get('GetUser/{id}' , [\App\Http\Controllers\Register::class , 'GetUser'])
 route::get('profile' , [\App\Http\Controllers\Register::class , 'profile']) ;
 
 route::post('reset_password' , [\App\Http\Controllers\Register::class , 'resetPassword']) ;
+
+route::get('My_posts' , [\App\Http\Controllers\Register::class , 'my_posts']) ;
