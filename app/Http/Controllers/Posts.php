@@ -660,42 +660,84 @@ class Posts extends Controller
         try
         {
             $user_id = Auth::id() ;
+
             if($request['type'] == 'estate')
             {
-                $Estates = DB::table('estates')
-                    ->join('favorites', 'estates.id', '=', 'favorites.estate_id')
+
+                $Estates = Estate::join('favorites', 'estates.id', '=', 'favorites.estate_id')
                     ->where('favorites.user_id', '=', $user_id)
                     ->get();
 
+                $estatesWithImages = collect();
+
+                foreach ($Estates as $estate) {
+                    $images = $estate->images()->get();
+                    $postWithImage = [
+                        'post' => $estate,
+                        'images' => $images
+                    ];
+                    $estatesWithImages->push($postWithImage);
+                }
+
                 return response()->json([
-                    'favorite_estates : ' => $Estates
+                    'favorite_estates : ' => $estatesWithImages
                 ]) ;
+
             }else if($request['type'] == 'car')
             {
-                $Cars = DB::table('cars')
-                    ->join('favorites', 'cars.id', '=', 'favorites.car_id')
+                $Cars = Car::join('favorites', 'cars.id', '=', 'favorites.car_id')
                     ->where('favorites.user_id', '=', $user_id)
                     ->get();
 
+                $CarsWithImages = collect();
+
+                foreach ($Cars as $car) {
+                    $images = $car->images()->get();
+                    $postWithImage = [
+                        'post' => $car,
+                        'images' => $images
+                    ];
+                    $CarsWithImages->push($postWithImage);
+                }
+
                 return response()->json([
-                    'favorite_cars : ' => $Cars
+                    'favorite_cars : ' => $CarsWithImages
                 ]) ;
 
             }else if($request['type'] == 'all')
             {
-                $Estates = DB::table('estates')
-                    ->join('favorites', 'estates.id', '=', 'favorites.estate_id')
+                $Estates = Estate::join('favorites', 'estates.id', '=', 'favorites.estate_id')
                     ->where('favorites.user_id', '=', $user_id)
                     ->get();
 
-                $Cars = DB::table('cars')
-                    ->join('favorites', 'cars.id', '=', 'favorites.car_id')
+                $Cars = Car::join('favorites', 'cars.id', '=', 'favorites.car_id')
                     ->where('favorites.user_id', '=', $user_id)
                     ->get();
+
+                $estatesWithImages = collect();
+
+                foreach ($Estates as $estate) {
+                    $images = $estate->images()->get();
+                    $postWithImage = [
+                        'post' => $estate,
+                        'images' => $images
+                    ];
+                    $estatesWithImages->push($postWithImage);
+                }
+
+                $CarsWithImages = collect() ;
+                foreach ($Cars as $car) {
+                    $images = $car->images()->get();
+                    $postWithImage = [
+                        'post' => $car,
+                        'images' => $images
+                    ];
+                    $CarsWithImages->push($postWithImage);
+                }
 
                 return response()->json([
-                    'favorites Estate: ' => $Estates ,
-                    'favorites Car: ' => $Cars ,
+                    'favorites Estate: ' => $estatesWithImages ,
+                    'favorites Car: ' => $CarsWithImages ,
                 ]) ;
 
             }
