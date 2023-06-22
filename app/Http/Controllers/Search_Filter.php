@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\Estate;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Auth;
 
 class Search_Filter extends Controller
 {
@@ -15,8 +17,10 @@ class Search_Filter extends Controller
     {
         try
         {
+            $user = Auth::user() ;
             if ($request['type'] == 'estate' )
             {
+
                 $post = \App\Models\Estate::all() ;
                 if ($request['estate_type'] != null)
                     $post = \App\Models\Estate::where('estate_type' , $request['estate_type']);
@@ -57,9 +61,11 @@ class Search_Filter extends Controller
                     $postsWithImages = [] ;
                     foreach ($post as $estate) {
                         $images = $estate->images()->get();
+                        $favorite = $user->isEstateFavorite($estate) ;
                         $postWithImage = [
                             'post' => $estate,
-                            'images' => $images
+                            'images' => $images,
+                            'Favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -130,9 +136,11 @@ class Search_Filter extends Controller
                     $postsWithImages = [] ;
                     foreach ($post as $car) {
                         $images = $car->images()->get();
+                        $favorite = $user->isCarFavorite($car) ;
                         $postWithImage = [
                             'post' => $car,
-                            'images' => $images
+                            'images' => $images,
+                            'Favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -160,6 +168,7 @@ class Search_Filter extends Controller
     {
         try
         {
+            $user =Auth::user() ;
              if ($request['type'] == 'car' )
             {
                 $post = Car::where('description' ,'like' ,'%'.$request['description'].'%') ->orWhere('address' ,'like' ,'%'.$request['description'].'%')->get();
@@ -169,9 +178,11 @@ class Search_Filter extends Controller
 
                     foreach ($post as $car) {
                         $images = $car->images()->get();
+                        $favorite = $user->isCarFavorite($car) ;
                         $postWithImage = [
                             'post' => $car,
-                            'images' => $images
+                            'images' => $images ,
+                            'Favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -192,9 +203,11 @@ class Search_Filter extends Controller
 
                     foreach ($post as $estate) {
                         $images = $estate->images()->get();
+                        $favorite = $user->isEstateFavorite($estate) ;
                         $postWithImage = [
                             'post' => $estate,
-                            'images' => $images
+                            'images' => $images,
+                            'Favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }

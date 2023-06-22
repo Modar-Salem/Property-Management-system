@@ -58,7 +58,7 @@ class User extends Authenticatable
 
     public function favorites(): HasMany
     {
-        return $this->hasMany(Favorite::class  ) ;
+        return $this->hasMany(Favorite::class ,'user_id' ) ;
     }
 
     public function estates(): HasMany
@@ -94,5 +94,15 @@ class User extends Authenticatable
     {
         $this->password = Hash::make($newPassword);
         $this->save();
+    }
+
+    public function isCarFavorite(Car $car)
+    {
+        return $this->favorites()->where('car_id', $car->id)->exists();
+    }
+
+    public function isEstateFavorite(Estate $estate)
+    {
+        return $this->favorites()->where('estate_id', $estate->id)->exists();
     }
 }

@@ -17,6 +17,15 @@ class Favorite extends Model
         'car_id' ,
         'estate_id'
     ] ;
+    public function car()
+    {
+        return $this->belongsTo(Car::class);
+    }
+
+    public function estate()
+    {
+        return $this->belongsTo(Estate::class);
+    }
 
 
 }

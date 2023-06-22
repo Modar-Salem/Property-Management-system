@@ -409,17 +409,23 @@ class Register extends Controller
         $estatesWithImages = collect();
         foreach ($user->estates as $estate) {
             $images = $estate->images()->get();
+            $favorite = $user->isEstateFavorite($estate) ;
             $postWithImage = [
                 'post' => $estate,
-                'images' => $images
+                'images' => $images,
+                'Favorite' => $favorite
             ];
             $estatesWithImages->push($postWithImage);
+
         }
         foreach ($user->cars as $cars) {
+
             $images = $cars->images()->get();
+            $favorite = $user->isCarFavorite($cars) ;
             $postWithImage = [
                 'post' => $cars,
-                'images' => $images
+                'images' => $images,
+                'Favorite' => $favorite
             ];
             $carsWithImages->push($postWithImage);
         }

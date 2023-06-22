@@ -27,7 +27,7 @@ class HomeController extends Controller
         {
             $postsWithImages =collect() ;
             $user_id = Auth::id();
-
+            $user = Auth::user() ;
             $favorites_location = DB::table('favorites')
                 ->join('estates', 'favorites.estate_id', '=', 'estates.id')
                 ->where('favorites.user_id', '=', $user_id)
@@ -40,9 +40,11 @@ class HomeController extends Controller
                 $posts = Estate::where('governorate', $favorite->governorate)->get();
                 foreach ($posts as $post) {
                     $images = $post->images()->get();
+                    $favorite = $user->isEstateFavorite($post) ;
                     $postWithImage = [
                         'post' => $post,
-                        'images' => $images
+                        'images' => $images ,
+                        'Favorite' => $favorite
                     ];
                     $postsWithImages->push($postWithImage);
                 }
@@ -56,12 +58,15 @@ class HomeController extends Controller
                 ->orderByDesc('average_rate')
                 ->get();
 
+
             foreach ($Top_Rating_Posts as $rating) {
                 $estate = Estate::find($rating->estate_id);
                 $images = $estate->images()->get();
+                $favorite = $user->isEstateFavorite($estate) ;
                 $postWithImage = [
                     'post' => $estate,
-                    'images' => $images
+                    'images' => $images,
+                    'favorite' => $favorite
                 ];
                 $postsWithImages->push($postWithImage);
             }
@@ -70,9 +75,11 @@ class HomeController extends Controller
 
             foreach ($All_Estate as $estate) {
                 $images = $estate->images()->get();
+                $favorite = $user->isEstateFavorite($estate) ;
                 $postWithImage = [
                     'post' => $estate,
-                    'images' => $images
+                    'images' => $images ,
+                    'favorite' => $favorite
                 ];
                 $postsWithImages->push($postWithImage);
             }
@@ -99,6 +106,7 @@ class HomeController extends Controller
     {
         try {
             $user_id = Auth::id();
+            $user= Auth::user() ;
             $favorites_location = DB::table('favorites')
                 ->join('cars', 'favorites.car_id', '=', 'cars.id')
                 ->where('favorites.user_id', '=', $user_id)
@@ -111,9 +119,11 @@ class HomeController extends Controller
                 $posts = Car::where('governorate', $favorite->governorate)->get();
                 foreach ($posts as $post) {
                     $images = $post->images()->get();
+                    $favorite = $user->isCarFavorite($post) ;
                     $postWithImage = [
                         'post' => $post,
-                        'images' => $images
+                        'images' => $images,
+                        'favorite' => $favorite
                     ];
                     $postsWithImages->push($postWithImage);
                 }
@@ -130,9 +140,11 @@ class HomeController extends Controller
             foreach ($Top_Rating_Posts as $rating) {
                 $car = Car::find($rating->car_id);
                 $images = $car->images()->get();
+                $favorite = $user->isCarFavorite($car) ;
                 $postWithImage = [
                     'post' => $car,
-                    'images' => $images
+                    'images' => $images,
+                    'favorite' => $favorite
                 ];
                 $postsWithImages->push($postWithImage);
             }
@@ -141,9 +153,11 @@ class HomeController extends Controller
 
             foreach ($All_Car as $car) {
                 $images = $car->images()->get();
+                $favorite = $user->isCarFavorite($car) ;
                 $postWithImage = [
                     'post' => $car,
-                    'images' => $images
+                    'images' => $images,
+                    'favorite' => $favorite
                 ];
                 $postsWithImages->push($postWithImage);
             }

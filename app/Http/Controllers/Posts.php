@@ -392,9 +392,11 @@ class Posts extends Controller
             $postsWithImages = [];
             foreach ($user->cars()->get() as $car) {
                 $images = $car->images()->get();
+                $favorite = $user->isCarFavorite($car) ;
                 $postWithImage = [
                     'post' => $car,
-                    'images' => $images
+                    'images' => $images,
+                    'Favorite' => $favorite
                 ];
                 array_push($postsWithImages, $postWithImage);
             }
@@ -416,9 +418,11 @@ class Posts extends Controller
             $postsWithImages = [];
             foreach ($user->estates()->get() as $estate) {
                 $images = $estate->images()->get();
+                $favorite = $user->isEstateFavorite($estate) ;
                 $postWithImage = [
                     'post' => $estate,
-                    'images' => $images
+                    'images' => $images,
+                    'Favorite' => $favorite
                 ];
                 array_push($postsWithImages, $postWithImage);
             }
@@ -500,14 +504,17 @@ class Posts extends Controller
 
     public function get_car($car_id)
     {
+        $user = Auth::user() ;
         $car = Car::find($car_id) ;
         if($car)
         {
+            $favorite = $user->isCarFavorite($car) ;
             return \response()->json([
                 'Status' => true ,
                 'Car : ' => $car ,
                 'images : ' => $car->images ,
-                'Owner : ' => $car->owner
+                'Owner : ' => $car->owner ,
+                'Favorite' => $favorite
             ]) ;
         }else
         {
@@ -520,14 +527,17 @@ class Posts extends Controller
 
     public function get_estate($estate_id)
     {
+        $user = Auth::user() ;
         $estate = Estate::find($estate_id) ;
         if($estate)
         {
+            $favorite = $user->isEstateFavorite($estate) ;
             return \response()->json([
                 'Status' => true ,
                 'Estate : ' => $estate ,
                 'images' => $estate->images ,
-                'Owner : ' => $estate->owner
+                'Owner : ' => $estate->owner ,
+                'Favorite' => $favorite
             ]) ;
         }else
         {
@@ -660,6 +670,7 @@ class Posts extends Controller
         try
         {
             $user_id = Auth::id() ;
+            $user = Auth::user() ;
 
             if($request['type'] == 'estate')
             {
@@ -672,9 +683,14 @@ class Posts extends Controller
 
                 foreach ($Estates as $estate) {
                     $images = $estate->images()->get();
+
+                    $estate1 = Estate::find($estate['estate_id']) ;
+                    $favorite = $user->isEstateFavorite($estate1) ;
+
                     $postWithImage = [
                         'post' => $estate,
-                        'images' => $images
+                        'images' => $images ,
+                        'Favorite' => $favorite
                     ];
                     $estatesWithImages->push($postWithImage);
                 }
@@ -693,10 +709,16 @@ class Posts extends Controller
 
                 foreach ($Cars as $car) {
                     $images = $car->images()->get();
+
+                    $car1 = Car::find($car['car_id']) ;
+                    $favorite = $user->isCarFavorite($car1) ;
+
                     $postWithImage = [
-                        'post' => $car,
-                        'images' => $images
+                        'post' => $car1,
+                        'images' => $images ,
+                        'Favorite' => $favorite
                     ];
+
                     $CarsWithImages->push($postWithImage);
                 }
 
@@ -718,21 +740,29 @@ class Posts extends Controller
 
                 foreach ($Estates as $estate) {
                     $images = $estate->images()->get();
+                    $estate1 = Estate::find($estate['estate_id']) ;
+                    $favorite = $user->isEstateFavorite($estate1) ;
                     $postWithImage = [
-                        'post' => $estate,
-                        'images' => $images
+                        'post' => $estate1,
+                        'images' => $images ,
+                        'Favorite' => $favorite
                     ];
+
                     $estatesWithImages->push($postWithImage);
                 }
 
                 $CarsWithImages = collect() ;
                 foreach ($Cars as $car) {
                     $images = $car->images()->get();
+                    $car1 = Car::find($car['car_id']) ;
+                    $favorite = $user->isCarFavorite($car1) ;
                     $postWithImage = [
-                        'post' => $car,
-                        'images' => $images
+                        'post' => $car1,
+                        'images' => $images ,
+                        'Favorite' => $favorite
                     ];
                     $CarsWithImages->push($postWithImage);
+
                 }
 
                 return response()->json([
