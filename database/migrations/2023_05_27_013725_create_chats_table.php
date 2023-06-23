@@ -18,13 +18,10 @@ class CreateChatsTable extends Migration
             $table->unsignedBigInteger('sender_id');
             $table->unsignedBigInteger('receiver_id');
             $table->text('message');
-            $table->timestamp('created_at')->useCurrent();
+            $table->foreign('sender_id')->references('id')->on('users');
+            $table->foreign('receiver_id')->references('id')->on('users');
 
-            // Add any additional columns you need for chat information
-
-            // Define foreign key constraints if required
-             $table->foreign('sender_id')->references('id')->on('users');
-             $table->foreign('receiver_id')->references('id')->on('users');
+            $table->timestamps();
         });
     }
 

@@ -163,7 +163,7 @@ class Posts extends Controller
 
     public function store_image_cars($image , $car_id)
     {
-        //validate Image
+
         try
         {
             $path = Null;

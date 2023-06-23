@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewMessage;
 use App\Models\Chat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Pusher\Pusher;
+use TheSeer\Tokenizer\Exception;
 
 class ChatController extends Controller
 {
@@ -16,29 +20,38 @@ class ChatController extends Controller
      */
     public function sendMessage(Request $request)
     {
-        $validatedData = $request->validate([
-            'sender_id' => 'required|exists:users,id',
-            'receiver_id' => 'required|exists:users,id',
-            'message' => 'required|string',
-        ]);
 
-        $chat = Chat::create($validatedData);
+        try{
+            $validatedData = Validator::make($request->all() , [
+
+                'receiver_id' => 'required|exists:users,id',
+                'message' => 'required|string',
+            ]);
+            if($validatedData->fails())
+            {
+                return response()->json([
+                    'Error' => $validatedData->errors()
+                ]);
+            }
 
 
-        // Broadcast event to Pusher
-        $pusher = new Pusher(
-            env('PUSHER_APP_KEY'),
-            env('PUSHER_APP_SECRET'),
-            env('PUSHER_APP_ID'),
-            [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => true, // Set to true if your app is using HTTPS
-            ]
-        );
+            $chat = Chat::create([
+                'sender_id' => Auth::id(),
+                'receiver_id' => $request['receiver_id'],
+                'message' => $request['message']
+            ]);
 
-        $pusher->trigger('chat-channel', 'new-message', $chat);
 
-        return response()->json($chat, 201);
+            event(new NewMessage($chat));
+
+            return response()->json($chat, 201);
+        }catch (Exception $exception)
+        {
+            return  response()->json([
+                'Error' => $exception->getMessage()
+            ]);
+        }
+
     }
 
     /**
