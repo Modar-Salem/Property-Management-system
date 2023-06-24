@@ -37,6 +37,7 @@ class Posts extends Controller
                     'description'=>'required',
                     'price'=>'required',
                     'kilometers' =>'required',
+                    'year' => 'required' ,
                     'image' => 'mimes:jpeg,jpg,png,gif' ,
                     'image1' => 'mimes:jpeg,jpg,png,gif' ,
                     'image2' => 'mimes:jpeg,jpg,png,gif' ,
@@ -83,7 +84,8 @@ class Posts extends Controller
                     'address'=>  $request['address'] ,
                     'fuel_type' => $request['fuel_type'] ,
                     'status' => $request['status'] ,
-                    'driving_force' => $request ['driving_force']
+                    'driving_force' => $request ['driving_force'] ,
+                    'year'=> $request['year']
                 ]) ;
 
 

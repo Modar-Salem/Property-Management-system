@@ -44,7 +44,7 @@ return new class extends Migration
             $table->text('description')->nullable();
 
             $table->double('price')->unsigned() ;
-            $table->integer('year')->unsigned()->min(1940)->max(2023) ;
+            $table->integer('year')->unsigned() ;
             $table->integer('kilometers')->unsigned() ;
 
             $table->timestamps();
