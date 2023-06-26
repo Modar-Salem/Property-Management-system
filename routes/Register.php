@@ -27,3 +27,4 @@ Route::post('/user/password/code/check', [\App\Http\Controllers\ForgotPasswordCo
 
 Route::post('/user/password/reset', [\App\Http\Controllers\ForgotPasswordController::class, 'userResetPassword']);
 
+route::post('check_code_email_verify' , [\App\Http\Controllers\Register::class , 'check_code_email_verify']) ;

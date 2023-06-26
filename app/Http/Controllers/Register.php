@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\verifyemail;
 use App\Models\Estate;
 use App\Models\User;
+use App\Models\verify_email;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
@@ -66,7 +69,6 @@ class Register extends Controller
      */
     public function SignUp(Request $request)
     {
-        try {
 
             $validate = Validator::make($request->all(), [
                 'name' => 'required | string | min:5 | max :34',
@@ -134,6 +136,7 @@ class Register extends Controller
                     ->update(
                         ['image' => URL::asset('/storage/' . $path)]
                     );
+                $this->send_code_verify($request) ;
 
                 if ($user)
                     return response()->json([
@@ -150,15 +153,62 @@ class Register extends Controller
                 "Token" => $token,
             ]);
 
-        } catch (\Exception $exception)
-        {
+
+
+
+    }
+
+    public function send_code_verify(Request $request)
+    {
+        $code = mt_rand(100000,999999);
+
+        //Send email to user
+        Mail::to($request['email'])->send(new \App\Mail\verifyemail($code));
+        verify_email::create([
+            'email' => $request['email'] ,
+            'code'=> $code
+        ]);
+
+    }
+    public function check_code_email_verify(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required' ,
+            'code' =>'required|string|exists:verify,code'
+        ]);
+        if ($validator->fails()) {
             return response()->json([
-                'Status' => false,
-                'Message' => $exception->getMessage()
-            ]);
+                'Status'=>false,
+                'ErrorMessage'=>$validator->errors()]);
         }
 
+        //find the code
+        $Code= verify_email::where('code',$request['code'])->first();
 
+        //check if it is not expired:the time is one hour
+        if($Code['created_at'] > now()->addHour() )
+        {
+            $Code->delete();
+            return response()->json(['Message'=>trans('code is expire')],422);
+        }
+
+        //find users email
+        $user = User::where('email',$Code['email']);
+
+        if($user['email'] != $request['email'])
+        {
+            return response()->json([
+                'Message' => 'code incorrect '
+            ]) ;
+        }
+        //update user password
+        $user->update(['email_verified_at' => now()]);
+        $Code->delete() ;
+
+        return response()->json([
+            'Status' => true ,
+            'Message' => 'email is verified'
+        ]) ;
     }
     /**
      * LogIn .

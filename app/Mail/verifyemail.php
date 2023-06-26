@@ -9,19 +9,28 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SendCodeResetPassword extends Mailable
+class verifyemail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $code;
-
+    public $code ;
+    /**
+     * Create a new message instance.
+     */
     public function __construct($code)
     {
-        $this->code = $code;
+
+        $this->code = $code ;
     }
 
+    /**
+     * Get the message envelope.
+     */
     public function build()
     {
-        return $this->markdown('emails.send_code_reset_password')->subject('Reset Password');
+
+        return $this->markdown('emails.verify_email')->subject('Verify Email');
     }
+
+
 }
