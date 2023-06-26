@@ -44,7 +44,7 @@ class HomeController extends Controller
                     $postWithImage = [
                         'post' => $post,
                         'images' => $images ,
-                        'Favorite' => $favorite
+                        'favorite' => $favorite
                     ];
                     $postsWithImages->push($postWithImage);
                 }

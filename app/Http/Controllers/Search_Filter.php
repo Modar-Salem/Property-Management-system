@@ -65,7 +65,7 @@ class Search_Filter extends Controller
                         $postWithImage = [
                             'post' => $estate,
                             'images' => $images,
-                            'Favorite' => $favorite
+                            'favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -140,7 +140,7 @@ class Search_Filter extends Controller
                         $postWithImage = [
                             'post' => $car,
                             'images' => $images,
-                            'Favorite' => $favorite
+                            'favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -182,7 +182,7 @@ class Search_Filter extends Controller
                         $postWithImage = [
                             'post' => $car,
                             'images' => $images ,
-                            'Favorite' => $favorite
+                            'favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }
@@ -207,7 +207,7 @@ class Search_Filter extends Controller
                         $postWithImage = [
                             'post' => $estate,
                             'images' => $images,
-                            'Favorite' => $favorite
+                            'favorite' => $favorite
                         ];
                         array_push($postsWithImages, $postWithImage);
                     }

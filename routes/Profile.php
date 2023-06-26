@@ -24,8 +24,7 @@ route::get('profile' , [\App\Http\Controllers\Register::class , 'profile']) ;
 
 route::post('reset_password' , [\App\Http\Controllers\Register::class , 'resetPassword']) ;
 
-route::get('My_posts' , [\App\Http\Controllers\Register::class , 'my_posts']) ;
-
+route::post('My_posts' , [\App\Http\Controllers\Register::class , 'my_posts']) ;
 
 Route::post('/sendMessage', [\App\Http\Controllers\ChatController::class, 'sendMessage']) ;
 

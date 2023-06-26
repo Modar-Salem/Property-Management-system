@@ -400,38 +400,74 @@ class Register extends Controller
         return response()->json(['message' => 'Password has been updated.']);
     }
 
-    public function my_posts()
+    public function my_posts(Request $request)
     {
         $id = Auth::id() ;
 
         $user = User::find($id) ;
         $carsWithImages = collect();
         $estatesWithImages = collect();
-        foreach ($user->estates as $estate) {
-            $images = $estate->images()->get();
-            $favorite = $user->isEstateFavorite($estate) ;
-            $postWithImage = [
-                'post' => $estate,
-                'images' => $images,
-                'Favorite' => $favorite
-            ];
-            $estatesWithImages->push($postWithImage);
+        if($request['type']=='estate') {
+            foreach ($user->estates as $estate)
+            {
+                $images = $estate->images()->get();
+                $favorite = $user->isEstateFavorite($estate);
+                $postWithImage = [
+                    'post' => $estate,
+                    'images' => $images,
+                    'favorite' => $favorite
+                ];
+                $estatesWithImages->push($postWithImage);
 
+            }
+            return response() -> json([
+                'Status' => true ,
+                'Estates' => $estatesWithImages ,
+            ]);
         }
-        foreach ($user->cars as $cars) {
-
-            $images = $cars->images()->get();
-            $favorite = $user->isCarFavorite($cars) ;
-            $postWithImage = [
-                'post' => $cars,
-                'images' => $images,
-                'Favorite' => $favorite
-            ];
-            $carsWithImages->push($postWithImage);
-        }
-
-        if($user)
+        if($request['type']=='car')
         {
+            foreach ($user->cars as $cars) {
+
+                $images = $cars->images()->get();
+                $favorite = $user->isCarFavorite($cars);
+                $postWithImage = [
+                    'post' => $cars,
+                    'images' => $images,
+                    'favorite' => $favorite
+                ];
+                $carsWithImages->push($postWithImage);
+                return response() -> json([
+                    'Status' => true ,
+                    'Cars' => $carsWithImages
+                ]);
+            }
+        }
+        if($request['type'] == 'all')
+        {
+            foreach ($user->cars as $cars) {
+
+                $images = $cars->images()->get();
+                $favorite = $user->isCarFavorite($cars);
+                $postWithImage = [
+                    'post' => $cars,
+                    'images' => $images,
+                    'favorite' => $favorite
+                ];
+                $carsWithImages->push($postWithImage) ;
+            }
+            foreach ($user->estates as $estate)
+            {
+                $images = $estate->images()->get();
+                $favorite = $user->isEstateFavorite($estate);
+                $postWithImage = [
+                    'post' => $estate,
+                    'images' => $images,
+                    'favorite' => $favorite
+                ];
+                $estatesWithImages->push($postWithImage);
+
+            }
             return response() -> json([
                 'Status' => true ,
                 'Estates' => $estatesWithImages ,

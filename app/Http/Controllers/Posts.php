@@ -396,7 +396,7 @@ class Posts extends Controller
                 $postWithImage = [
                     'post' => $car,
                     'images' => $images,
-                    'Favorite' => $favorite
+                    'favorite' => $favorite
                 ];
                 array_push($postsWithImages, $postWithImage);
             }
@@ -422,7 +422,7 @@ class Posts extends Controller
                 $postWithImage = [
                     'post' => $estate,
                     'images' => $images,
-                    'Favorite' => $favorite
+                    'favorite' => $favorite
                 ];
                 array_push($postsWithImages, $postWithImage);
             }
@@ -514,7 +514,7 @@ class Posts extends Controller
                 'Car : ' => $car ,
                 'images : ' => $car->images ,
                 'Owner : ' => $car->owner ,
-                'Favorite' => $favorite
+                'favorite' => $favorite
             ]) ;
         }else
         {
@@ -537,7 +537,7 @@ class Posts extends Controller
                 'Estate : ' => $estate ,
                 'images' => $estate->images ,
                 'Owner : ' => $estate->owner ,
-                'Favorite' => $favorite
+                'favorite' => $favorite
             ]) ;
         }else
         {
@@ -690,7 +690,7 @@ class Posts extends Controller
                     $postWithImage = [
                         'post' => $estate,
                         'images' => $images ,
-                        'Favorite' => $favorite
+                        'favorite' => $favorite
                     ];
                     $estatesWithImages->push($postWithImage);
                 }
@@ -716,7 +716,7 @@ class Posts extends Controller
                     $postWithImage = [
                         'post' => $car1,
                         'images' => $images ,
-                        'Favorite' => $favorite
+                        'favorite' => $favorite
                     ];
 
                     $CarsWithImages->push($postWithImage);
@@ -745,7 +745,7 @@ class Posts extends Controller
                     $postWithImage = [
                         'post' => $estate1,
                         'images' => $images ,
-                        'Favorite' => $favorite
+                        'favorite' => $favorite
                     ];
 
                     $estatesWithImages->push($postWithImage);
@@ -759,7 +759,7 @@ class Posts extends Controller
                     $postWithImage = [
                         'post' => $car1,
                         'images' => $images ,
-                        'Favorite' => $favorite
+                        'favorite' => $favorite
                     ];
                     $CarsWithImages->push($postWithImage);
 
