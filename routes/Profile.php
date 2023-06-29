@@ -26,6 +26,8 @@ route::post('reset_password' , [\App\Http\Controllers\Register::class , 'resetPa
 
 route::post('My_posts' , [\App\Http\Controllers\Register::class , 'my_posts']) ;
 
-Route::post('/sendMessage', [\App\Http\Controllers\ChatController::class, 'sendMessage']) ;
+Route::post('sendMessage', [\App\Http\Controllers\ChatController::class, 'sendMessage']) ;
 
-Route::post('/getConversation', [\App\Http\Controllers\ChatController::class, 'getConversation']) ;
+Route::post('getConversation', [\App\Http\Controllers\ChatController::class, 'getConversation']) ;
+
+Route::get('getChattedPersons/{senderId}', [\App\Http\Controllers\ChatController::class, 'getChattedPersons']) ;

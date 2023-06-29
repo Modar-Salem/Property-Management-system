@@ -78,4 +78,15 @@ class ChatController extends Controller
         return response()->json($chats, 200);
     }
 
+    public function getChattedPersons($senderId)
+    {
+        $senders = Chat::where('sender_id', $senderId)->distinct('receiver_id')->pluck('receiver_id');
+        $receivers = Chat::where('receiver_id', $senderId)->distinct('sender_id')->pluck('sender_id');
+
+        // Merge and retrieve unique values from both sender and receiver IDs
+        $chattedPersons = $senders->merge($receivers)->unique();
+
+        return $chattedPersons;
+    }
+
 }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\verifyemail;
 use App\Models\Estate;
 use App\Models\User;
 use App\Models\verify_email;
@@ -79,7 +78,7 @@ class Register extends Controller
 
                 'phone_number' => 'required | string | min :8 | max : 14' ,
 
-                'image' => 'mimes:jpeg,jpg,png'
+                'image' => 'mimes:jpeg,jpg,png | max:10240'
 
             ]);
             if ($validate->fails())
@@ -160,6 +159,17 @@ class Register extends Controller
 
     public function send_code_verify(Request $request)
     {
+        $validate = Validator::make($request->all(), [
+            'email' => 'required | email | unique:users,email',
+
+        ]);
+        if ($validate->fails())
+            return response()->json([
+                'Status' => false,
+                'Validation Error' => $validate->errors()
+            ]);
+
+
         $code = mt_rand(100000,999999);
 
         //Send email to user
@@ -170,6 +180,8 @@ class Register extends Controller
         ]);
 
     }
+
+
     public function check_code_email_verify(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -299,7 +311,7 @@ class Register extends Controller
         $user_id = Auth::id() ;
 
         $validate = Validator::make($request->all(), [
-            'image' => 'mimes:jpeg,jpg,png,gif | required']);
+            'image' => 'mimes:jpeg,jpg,png,gif | required | max : 10240']);
 
         if ($validate->fails()) {
             return response()->json([
@@ -440,6 +452,16 @@ class Register extends Controller
     public function resetPassword(Request $request)
     {
         $user = Auth::user();
+        $validate = Validator::make($request->all(), [
+            'old_password' => 'required | string | min : 8 | max:34 ' ,
+            'password' => 'required | string | min : 8 | max:34 '
+        ]);
+        if ($validate->fails())
+            return response()->json([
+                'Status' => false,
+                'Validation Error' => $validate->errors()
+            ]);
+
 
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json(['error' => 'Old password is incorrect.'], 422);
@@ -452,6 +474,16 @@ class Register extends Controller
 
     public function my_posts(Request $request)
     {
+        $validate = Validator::make($request->all(), [
+            'type'=> 'required'
+        ]);
+
+        if ($validate->fails())
+            return response()->json([
+                'Status' => false,
+                'Validation Error' => $validate->errors()
+            ]);
+
         $id = Auth::id() ;
 
         $user = User::find($id) ;

@@ -38,16 +38,16 @@ class Posts extends Controller
                     'price'=>'required',
                     'kilometers' =>'required',
                     'year' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image1' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif'
+                    'image' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image1' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image2' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image3' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image4' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image5' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image6' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image7' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image8' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image9' => 'mimes:jpeg,jpg,png,gif | max:10420'
                 ]);
                 if ($validate->fails())
                     return response()->json([
@@ -59,7 +59,7 @@ class Posts extends Controller
                 return response()->json([
                     'Status' => false ,
                     'Message' => $exception->getMessage()
-                ] ) ;
+                ]) ;
             }
             // create product
 
@@ -148,7 +148,7 @@ class Posts extends Controller
             {
                 return response()->json([
                     'Status' => false ,
-                    'Error  '=> $exception->getMessage()
+                    'Message' => $exception->getMessage()
                 ]) ;
             }
 
@@ -156,7 +156,7 @@ class Posts extends Controller
         catch (\Exception $exception)
         {
             return response()->json([
-                'Status' => true ,
+                'Status' => false ,
                 'Message' => $exception->getMessage()
             ]) ;
         }
@@ -196,9 +196,9 @@ class Posts extends Controller
         } catch (\Exception $exception)
         {
             return response()->json([
-                'Status' => false,
+                'Status' => false ,
                 'Message' => $exception->getMessage()
-            ]);
+            ]) ;
         }
     }
 
@@ -221,16 +221,16 @@ class Posts extends Controller
                     'price'=>'required',
                     'space' => 'required' ,
                     'estate_type' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image1' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image1' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image2' => 'mimes:jpeg,jpg,png,gif | max:10420'  ,
+                    'image3' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image4' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image5' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image6' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image7' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image8' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
+                    'image9' => 'mimes:jpeg,jpg,png,gif | max:10420'
 
                 ]);
                 if ($validate->fails())
@@ -243,7 +243,7 @@ class Posts extends Controller
                 return response()->json([
                     'Status' => false ,
                     'Message' => $exception->getMessage()
-                ] ) ;
+                ]) ;
             }
             // create product
 
@@ -329,7 +329,7 @@ class Posts extends Controller
             {
                 return response()->json([
                     'Status' => false ,
-                    'Error'=> $exception->getMessage()
+                    'Message' => $exception->getMessage()
                 ]) ;
             }
 
@@ -337,7 +337,7 @@ class Posts extends Controller
         catch (\Exception $exception)
         {
             return response()->json([
-                'Status' => true ,
+                'Status' => false ,
                 'Message' => $exception->getMessage()
             ]) ;
         }
@@ -378,112 +378,131 @@ class Posts extends Controller
         } catch (\Exception $exception)
         {
             return response()->json([
-                'Status' => false,
+                'Status' => false ,
                 'Message' => $exception->getMessage()
-            ]);
+            ]) ;
         }
     }
 
     public function Get_User_Cars($id)
     {
-        $user = User::find($id);
+        try{
 
-        if ($user) {
-            $postsWithImages = [];
-            foreach ($user->cars()->get() as $car) {
-                $images = $car->images()->get();
-                $favorite = $user->isCarFavorite($car) ;
-                $postWithImage = [
-                    'post' => $car,
-                    'images' => $images,
-                    'favorite' => $favorite
-                ];
-                array_push($postsWithImages, $postWithImage);
+            $user = User::find($id);
+
+            if ($user) {
+                $postsWithImages = [];
+                foreach ($user->cars()->get() as $car) {
+                    $images = $car->images()->get();
+                    $favorite = $user->isCarFavorite($car);
+                    $postWithImage = [
+                        'post' => $car,
+                        'images' => $images,
+                        'favorite' => $favorite
+                    ];
+                    array_push($postsWithImages, $postWithImage);
+                }
+                return response()->json([
+                    'posts' => $postsWithImages
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'User not found'
+                ]);
             }
+        }catch (\Exception $exception)
+        {
             return response()->json([
-                'posts' => $postsWithImages
-            ]);
-        } else {
-            return response()->json([
-                'message' => 'User not found'
-            ]);
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
         }
     }
 
     public function Get_User_Estates($id)
     {
-        $user = User::find($id);
+        try{
+            $user = User::find($id);
 
-        if ($user) {
-            $postsWithImages = [];
-            foreach ($user->estates()->get() as $estate) {
-                $images = $estate->images()->get();
-                $favorite = $user->isEstateFavorite($estate) ;
-                $postWithImage = [
-                    'post' => $estate,
-                    'images' => $images,
-                    'favorite' => $favorite
-                ];
-                array_push($postsWithImages, $postWithImage);
+            if ($user) {
+                $postsWithImages = [];
+                foreach ($user->estates()->get() as $estate) {
+                    $images = $estate->images()->get();
+                    $favorite = $user->isEstateFavorite($estate);
+                    $postWithImage = [
+                        'post' => $estate,
+                        'images' => $images,
+                        'favorite' => $favorite
+                    ];
+                    array_push($postsWithImages, $postWithImage);
+                }
+                return response()->json([
+                    'posts' => $postsWithImages
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'User not found'
+                ]);
             }
-            return response()->json([
-                'posts' => $postsWithImages
-            ]);
-        } else
+        }catch (\Throwable $exception)
         {
             return response()->json([
-                'message' => 'User not found'
-            ]);
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
         }
     }
 
     public function remove_estate_posts($post_id)
     {
-
-        $post = Estate::find($post_id) ;
-        if(!$post)
-        {
-            return response()->json([
-                'Message' => 'Post Not Exist'
-            ]) ;
-        }
-
-        $owner_id  = $post['owner_id'] ;
-
-        try
-        {
-            if ($owner_id == Auth::id() or \auth()->user()->role = 'admin')
-            {
-                $post->delete() ;
-
+        try{
+            $post = Estate::find($post_id);
+            if (!$post) {
                 return response()->json([
-                    'Status' => true ,
-                    'Message' => 'Deleted Successfully'
-                ]) ;
-
+                    'Message' => 'Post Not Exist'
+                ]);
             }
-        }catch(\Exception $exception)
+
+            $owner_id = $post['owner_id'];
+
+            try {
+                if ($owner_id == Auth::id() or \auth()->user()->role = 'admin') {
+                    $post->delete();
+
+                    return response()->json([
+                        'Status' => true,
+                        'Message' => 'Deleted Successfully'
+                    ]);
+
+                }
+            } catch (\Exception $exception) {
+                return response()->json([
+                    'Status' => false,
+                    'Error' => $exception->getMessage()
+                ]);
+            }
+        }catch (\Throwable $exception)
         {
             return response()->json([
                 'Status' => false ,
-                'Error' => $exception->getMessage()
+                'Message' => $exception->getMessage()
             ]) ;
         }
     }
 
     public function remove_car_posts($post_id)
     {
-
-        $post = Car::find($post_id) ;
-        if(!$post)
-        {
-            return response()->json([
-                'Message' => 'Post Not Exist'
-            ]) ;
-        }
-        $owner_id  = $post['owner_id'] ;
         try
         {
+            $post = Car::find($post_id) ;
+            if(!$post)
+            {
+                return response()->json([
+                    'Message' => 'Post Not Exist'
+                ]) ;
+            }
+
+            $owner_id  = $post['owner_id'] ;
             if ($owner_id == Auth::id() or \auth()->user()->role = 'admin')
             {
                 $post->delete() ;
@@ -493,59 +512,73 @@ class Posts extends Controller
                     'Message' => 'Deleted Successfully'
                 ]) ;
             }
+
         }catch(\Exception $exception)
         {
             return response()->json([
                 'Status' => false ,
-                'Error' => $exception->getMessage()
+                'Message' => $exception->getMessage()
             ]) ;
         }
     }
 
     public function get_car($car_id)
     {
-        $user = Auth::user() ;
-        $car = Car::find($car_id) ;
-        if($car)
+        try{
+            $user = Auth::user();
+            $car = Car::find($car_id);
+            if ($car) {
+                $favorite = $user->isCarFavorite($car);
+                return \response()->json([
+                    'Status' => true,
+                    'Car : ' => $car,
+                    'images : ' => $car->images,
+                    'Owner : ' => $car->owner,
+                    'favorite' => $favorite
+                ]);
+            } else {
+                return \response()->json([
+                    'Status' => false,
+                    'Car : ' => "Car Not exist"
+                ]);
+            }
+        }catch (\Throwable $exception)
         {
-            $favorite = $user->isCarFavorite($car) ;
-            return \response()->json([
-                'Status' => true ,
-                'Car : ' => $car ,
-                'images : ' => $car->images ,
-                'Owner : ' => $car->owner ,
-                'favorite' => $favorite
-            ]) ;
-        }else
-        {
-            return \response()->json([
+            return response()->json([
                 'Status' => false ,
-                'Car : ' => "Car Not exist"
+                'Message' => $exception->getMessage()
             ]) ;
         }
     }
 
     public function get_estate($estate_id)
     {
-        $user = Auth::user() ;
-        $estate = Estate::find($estate_id) ;
-        if($estate)
+        try{
+            $user = Auth::user();
+            $estate = Estate::find($estate_id);
+            if ($estate) {
+                $favorite = $user->isEstateFavorite($estate);
+                return \response()->json([
+                    'Status' => true,
+                    'Estate : ' => $estate,
+                    'images' => $estate->images,
+                    'Owner : ' => $estate->owner,
+                    'favorite' => $favorite
+                ]);
+            } else {
+                return \response()->json([
+                    'Status' => false,
+                    'Estate : ' => "Estate Not exist"
+                ]);
+            }
+        }catch (\Throwable $exception)
         {
-            $favorite = $user->isEstateFavorite($estate) ;
-            return \response()->json([
-                'Status' => true ,
-                'Estate : ' => $estate ,
-                'images' => $estate->images ,
-                'Owner : ' => $estate->owner ,
-                'favorite' => $favorite
-            ]) ;
-        }else
-        {
-            return \response()->json([
+            return response()->json([
                 'Status' => false ,
-                'Estate : ' => "Estate Not exist"
+                'Message' => $exception->getMessage()
             ]) ;
         }
+
     }
 
     /**
@@ -561,6 +594,7 @@ class Posts extends Controller
             $validate = Validator::make($request->all() ,
                 [
                     'rate' => 'Required | min :1 | max :5 |integer ',
+                    'type' => 'required | in:car,estate'
                 ]) ;
 
             if($validate->fails())
@@ -632,6 +666,19 @@ class Posts extends Controller
     public function Get_Rate(Request $request){
         try
         {
+            $validate = Validator::make($request->all() ,
+                [
+                    'type' => 'Required | in:estate,car',
+
+                ]) ;
+
+            if($validate->fails())
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => $validate->errors()
+                ]) ;
+            }
             $sum = 0  ;
             $count = 0 ;
 
@@ -659,7 +706,6 @@ class Posts extends Controller
                 'Status' => false ,
                 'Message' => $exception->getMessage()
             ]) ;
-
         }
     }
 
@@ -669,6 +715,18 @@ class Posts extends Controller
     {
         try
         {
+            $validate = Validator::make($request->all() ,
+                [
+                    'type' => 'Required |  in:estate,car,all',
+                ]) ;
+
+            if($validate->fails())
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => $validate->errors()
+                ]) ;
+            }
             $user_id = Auth::id() ;
             $user = Auth::user() ;
 
@@ -777,8 +835,8 @@ class Posts extends Controller
         catch (\Exception $exception)
         {
             return response()->json([
-                'Status'=>false ,
-                'Message'=>$exception->getMessage()
+                'Status' => false ,
+                'Message' => $exception->getMessage()
             ]) ;
         }
     }
@@ -792,6 +850,18 @@ class Posts extends Controller
     {
         try
         {
+            $validate = Validator::make($request->all() ,
+                [
+                    'type' => 'Required |  in:estate,car,all',
+                ]) ;
+
+            if($validate->fails())
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => $validate->errors()
+                ]) ;
+            }
             $user_id = Auth::id() ;
 
             if($request['type'] == 'estate') {
@@ -851,8 +921,8 @@ class Posts extends Controller
         catch (\Exception $exception)
         {
             return response()->json([
-                'Status'=>false ,
-                'Message'=>$exception->getMessage()
+                'Status' => false ,
+                'Message' => $exception->getMessage()
             ]) ;
         }
 
@@ -861,6 +931,18 @@ class Posts extends Controller
     {
         try
         {
+            $validate = Validator::make($request->all() ,
+                [
+                    'type' => 'Required |  in:estate,car',
+                ]) ;
+
+            if($validate->fails())
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => $validate->errors()
+                ]) ;
+            }
             if($request['type'] == 'car')
             {
                 $car = Car::find($request['id']) ;
@@ -899,7 +981,7 @@ class Posts extends Controller
             return response()->json([
                 'Status' => false ,
                 'Message' => $exception->getMessage()
-            ] ) ;
+            ]) ;
         }
     }
 

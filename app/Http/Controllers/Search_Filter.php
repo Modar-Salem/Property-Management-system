@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class Search_Filter extends Controller
 {
@@ -168,6 +169,16 @@ class Search_Filter extends Controller
     {
         try
         {
+            $validate = Validator::make($request->all(), [
+                'type' => 'required | in:estate,car' ,
+                'description' => 'required'
+            ]);
+            if ($validate->fails())
+                return response()->json([
+                    'Status' => false,
+                    'Validation Error' => $validate->errors()
+                ]);
+
             $user =Auth::user() ;
              if ($request['type'] == 'car' )
             {
