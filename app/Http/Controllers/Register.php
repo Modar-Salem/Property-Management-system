@@ -78,7 +78,7 @@ class Register extends Controller
 
                 'phone_number' => 'required | string | min :8 | max : 14' ,
 
-                'image' => 'mimes:jpeg,jpg,png | max:10240'
+                'image' => 'mimes:jpeg,jpg,png'
 
             ]);
             if ($validate->fails())
@@ -311,7 +311,7 @@ class Register extends Controller
         $user_id = Auth::id() ;
 
         $validate = Validator::make($request->all(), [
-            'image' => 'mimes:jpeg,jpg,png,gif | required | max : 10240']);
+            'image' => 'mimes:jpeg,jpg,png,gif | required ']);
 
         if ($validate->fails()) {
             return response()->json([

@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Events\NewMessage;
 use App\Models\Chat;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Pusher\Pusher;
 use TheSeer\Tokenizer\Exception;
+use function Ramsey\Collection\add;
 
 class ChatController extends Controller
 {
@@ -25,7 +27,7 @@ class ChatController extends Controller
             $validatedData = Validator::make($request->all() , [
 
                 'receiver_id' => 'required|exists:users,id',
-                'message' => 'required|string',
+                'message' => 'required|string | max : 600',
             ]);
             if($validatedData->fails())
             {
@@ -63,30 +65,39 @@ class ChatController extends Controller
     public function getConversation(Request $request)
     {
         $validatedData = $request->validate([
-            'sender_id' => 'required|exists:users,id',
             'receiver_id' => 'required|exists:users,id',
         ]);
+        $sender_id = Auth::id();
 
-        $chats = Chat::where(function ($query) use ($validatedData) {
-            $query->where('sender_id', $validatedData['sender_id'])
+        $chats = Chat::where(function ($query) use ($validatedData, $sender_id) {
+            $query->where('sender_id', $sender_id)
                 ->where('receiver_id', $validatedData['receiver_id']);
-        })->orWhere(function ($query) use ($validatedData) {
+        })->orWhere(function ($query) use ($validatedData, $sender_id) {
             $query->where('sender_id', $validatedData['receiver_id'])
-                ->where('receiver_id', $validatedData['sender_id']);
+                ->where('receiver_id', $sender_id);
         })->get();
 
         return response()->json($chats, 200);
     }
 
-    public function getChattedPersons($senderId)
+
+    public function getChattedPersons()
     {
+        $senderId = Auth::id() ;
         $senders = Chat::where('sender_id', $senderId)->distinct('receiver_id')->pluck('receiver_id');
         $receivers = Chat::where('receiver_id', $senderId)->distinct('sender_id')->pluck('sender_id');
 
         // Merge and retrieve unique values from both sender and receiver IDs
-        $chattedPersons = $senders->merge($receivers)->unique();
-
-        return $chattedPersons;
+        $chattedPersons_id = $senders->merge($receivers)->unique();
+        $chattedPersons= [] ;
+        foreach ($chattedPersons_id as $id)
+        {
+            array_push($chattedPersons , User::find($id));
+        }
+        return response()->json([
+            'status' => true ,
+            'Chatted_Person :'  => $chattedPersons
+        ]);
     }
 
 }

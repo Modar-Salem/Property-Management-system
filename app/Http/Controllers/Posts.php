@@ -38,16 +38,16 @@ class Posts extends Controller
                     'price'=>'required',
                     'kilometers' =>'required',
                     'year' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image1' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif | max:10420'
+                    'image' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image1' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image2' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image3' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image4' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image5' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image6' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image7' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image8' => 'mimes:jpeg,jpg,png,gif ' ,
+                    'image9' => 'mimes:jpeg,jpg,png,gif '
                 ]);
                 if ($validate->fails())
                     return response()->json([
@@ -221,16 +221,16 @@ class Posts extends Controller
                     'price'=>'required',
                     'space' => 'required' ,
                     'estate_type' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image1' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif | max:10420'  ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif | max:10420' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif | max:10420'
+                    'image' => 'mimes:jpeg,jpg,png,gif ',
+                    'image1' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image2' => 'mimes:jpeg,jpg,png,gif'  ,
+                    'image3' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image4' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image5' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image6' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image7' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image8' => 'mimes:jpeg,jpg,png,gif' ,
+                    'image9' => 'mimes:jpeg,jpg,png,gif'
 
                 ]);
                 if ($validate->fails())
