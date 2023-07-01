@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
+use Faker\Factory as Faker;
 
 class User extends Authenticatable
 {
@@ -105,4 +106,19 @@ class User extends Authenticatable
     {
         return $this->favorites()->where('estate_id', $estate->id)->exists();
     }
+
+    public function generateFakeData()
+    {
+        $faker = Faker::create();
+        $this->name = $faker->name;
+        $this->email = $faker->email;
+        $this->password = Hash::make($faker->password);
+        $this->phone_number = $faker->phoneNumber;
+        $this->image = $faker->imageUrl;
+        $this->facebook_URL = $faker->url;
+        $this->instagram_URL = $faker->url;
+        $this->twitter_URL = $faker->url;
+
+    }
+
 }

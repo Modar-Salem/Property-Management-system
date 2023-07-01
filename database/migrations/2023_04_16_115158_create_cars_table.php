@@ -38,8 +38,8 @@ return new class extends Migration
 
             $table->string('address')->nullable() ;
 
-            $table->enum('color', [['Blue', 'Red', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Purple', 'Orange', 'Gray', 'Brown', 'Beige', 'Turquoise'
-                , 'Gold', 'Silver', 'Magenta', 'Navy', 'Teal', 'Maroon', 'Lavender', 'Cream', 'Olive', 'Sky blue', 'Coral', 'Indigo', 'Charcoal', 'Rust', 'Mint green', 'Mustard', 'Champagne']])->nullable() ;
+            $table->enum('color', ['Blue', 'Red', 'Green', 'Black', 'White', 'Yellow', 'Pink', 'Purple', 'Orange', 'Gray', 'Brown', 'Beige', 'Turquoise'
+                , 'Gold', 'Silver', 'Magenta', 'Navy', 'Teal', 'Maroon', 'Lavender', 'Cream', 'Olive', 'Sky blue', 'Coral', 'Indigo', 'Charcoal', 'Rust', 'Mint green', 'Mustard', 'Champagne'])->nullable() ;
 
             $table->text('description')->nullable();
 
