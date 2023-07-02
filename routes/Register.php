@@ -14,17 +14,22 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-
+//Register
 Route::post('SignUp' , [\App\Http\Controllers\Register::class , 'SignUp'] ) ;
 
 Route::post('LogIn' , [\App\Http\Controllers\Register::class , 'LogIn']) ;
 
 Route::get('LogOut' , [\App\Http\Controllers\Register::class , 'LogOut'])->middleware('auth:sanctum') ;
 
+//Verify Email
+Route::post('check_code_email_verify' , [\App\Http\Controllers\Register::class , 'check_code_email_verify']) ;
+
+Route::post('send_code' , [\App\Http\Controllers\Register::class , 'send_code_verify']) ;
+
+
+//Forgot Password
 Route::post('/user/password/email', [\App\Http\Controllers\ForgotPasswordController::class, 'userForgotPassword']);
 
 Route::post('/user/password/code/check', [\App\Http\Controllers\ForgotPasswordController::class, 'userCheckCode']);
 
 Route::post('/user/password/reset', [\App\Http\Controllers\ForgotPasswordController::class, 'userResetPassword']);
-
-route::post('check_code_email_verify' , [\App\Http\Controllers\Register::class , 'check_code_email_verify']) ;

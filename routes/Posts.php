@@ -13,38 +13,40 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+//Search And Fiter
 route::post('search' , [\App\Http\Controllers\Search_Filter::class , 'Search']);
 
 route::post('filter' , [\App\Http\Controllers\Search_Filter::class , 'Filter']);
 
+
+//Add Post (Car And Estate)
 route::post('Add_Estate', [\App\Http\Controllers\Posts::class , 'store_estate']) ;
 
 route::post('Add_Cars', [\App\Http\Controllers\Posts::class , 'store_car']) ;
 
-route::get('Get_User_Estate/{id}' ,[\App\Http\Controllers\Posts::class , 'Get_User_Estates'] ) ;
 
-route::post('Likes_number', [\App\Http\Controllers\Posts::class , 'Likes_number']) ;
+//Get Posts
+route::get('Get_User_Estate/{id}' ,[\App\Http\Controllers\Posts::class , 'Get_User_Estates'] ) ;
 
 route::get('Get_User_Cars/{id}' ,[\App\Http\Controllers\Posts::class , 'Get_User_Cars'] ) ;
 
-route::get('Remove_Estate/{id}' , [\App\Http\Controllers\Posts::class , 'remove_estate_posts']) ;
-
-route::get('Remove_Car/{id}' , [\App\Http\Controllers\Posts::class , 'remove_car_posts']) ;
-
-route::get('Estate_Home' , [\App\Http\Controllers\HomeController::class,'Estate_Home']) ;
-
-route::get('Car_Home' , [\App\Http\Controllers\HomeController::class,'Car_Home']) ;
 
 route::get('Get_Car/{id}' , [\App\Http\Controllers\Posts::class,'get_car']) ;
 
 route::get('Get_Estate/{id}' , [\App\Http\Controllers\Posts::class,'get_estate']) ;
 
-Route::post('Give_Rate' , [\App\Http\Controllers\Posts::class , 'rate']) ;
 
-Route::post('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
+//Remove And Update Posts
+route::get('Remove_Estate/{id}' , [\App\Http\Controllers\Posts::class , 'remove_estate_post']) ;
 
-Route::post('Add_To_Favorite' , [\App\Http\Controllers\Posts::class , 'Add_To_Favorite']) ;
-
-Route::post('Get_All_Favorite' , [\App\Http\Controllers\Posts::class , 'Get_All_Favorite']) ;
+route::get('Remove_Car/{id}' , [\App\Http\Controllers\Posts::class , 'remove_car_post']) ;
 
 Route::post('Update_Post' , [\App\Http\Controllers\Posts::class , 'update_post']) ;
+
+
+//Home route
+route::get('Estate_Home' , [\App\Http\Controllers\HomeController::class,'Estate_Home']) ;
+
+route::get('Car_Home' , [\App\Http\Controllers\HomeController::class,'Car_Home']) ;
+
+

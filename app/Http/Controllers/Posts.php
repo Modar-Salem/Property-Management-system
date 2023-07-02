@@ -5,165 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\Favorite;
-use App\Models\Image;
 use App\Models\Rate;
 use App\Models\User;
-use http\Env\Response;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use PHPUnit\Event\Code\Throwable;
+
 
 class Posts extends Controller
 {
-    public function store_car(Request $request)
-    {
 
-        try
-        {
-            try
-            {
-
-                $validate = Validator::make($request->all(), [
-
-                    'operation_type' => 'required',
-                    'transmission_type' =>'required',
-                    'brand' => 'required',
-                    'governorate'=>'required',
-                    'description'=>'required',
-                    'price'=>'required',
-                    'kilometers' =>'required',
-                    'year' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image1' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif ' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif '
-                ]);
-                if ($validate->fails())
-                    return response()->json([
-                        'Status' => false,
-                        'Validation Error' => $validate->errors()
-                    ]);
-            }
-            catch (\Exception $exception ) {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $exception->getMessage()
-                ]) ;
-            }
-            // create product
-
-            try
-            {
-
-                $id = Auth::id();
-
-                $Car = \App\Models\Car::create([
-
-                    'owner_id'=> $id,
-                    'operation_type' => $request['operation_type'],
-                    'transmission_type' => $request['transmission_type'],
-                    'brand'=> $request['brand'],
-                    'secondary_brand'=> $request['secondary_brand'],
-                    'governorate'=> $request['governorate'],
-                    'locationInDamascus'=> $request['locationInDamascus'],
-                    'color'=> $request['color'],
-                    'description'=> $request['description'],
-                    'price'=> $request['price'],
-                    'kilometers'=> $request['kilometers'],
-                    'address'=>  $request['address'] ,
-                    'fuel_type' => $request['fuel_type'] ,
-                    'status' => $request['status'] ,
-                    'driving_force' => $request ['driving_force'] ,
-                    'year'=> $request['year']
-                ]) ;
-
-
-                if ($request->hasFile('image'))
-                {
-                    $this->store_image_cars($request->file('image') , $Car->id) ;
-                }
-
-                if ($request->hasFile('image1'))
-                {
-                    $this->store_image_cars($request->file('image1'), $Car->id);
-                }
-
-                if ($request->hasFile('image2'))
-                {
-                    $this->store_image_cars($request->file('image2'), $Car->id);
-                }
-
-                if ($request->hasFile('image3'))
-                {
-                    $this->store_image_cars($request->file('image3'), $Car->id);
-                }
-                if ($request->hasFile('image4'))
-                {
-                    $this->store_image_cars($request->file('image4') , $Car->id) ;
-                }
-
-                if ($request->hasFile('image5'))
-                {
-                    $this->store_image_cars($request->file('image5'), $Car->id);
-                }
-
-                if ($request->hasFile('image6'))
-                {
-                    $this->store_image_cars($request->file('image6'), $Car->id);
-                }
-
-                if ($request->hasFile('image7'))
-                {
-                    $this->store_image_cars($request->file('image7'), $Car->id);
-                }
-                if ($request->hasFile('image8'))
-                {
-                    $this->store_image_cars($request->file('image8'), $Car->id);
-                }
-
-                if ($request->hasFile('image9'))
-                {
-                    $this->store_image_cars($request->file('image9'), $Car->id);
-                }
-
-                return response() ->json([
-                    'Status' => true ,
-                    'Car'=> $Car,
-                    'images' => $Car->images()->get()
-                ],201) ;
-
-            }
-            catch (\Exception $exception)
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $exception->getMessage()
-                ]) ;
-            }
-
-        }
-        catch (\Exception $exception)
-        {
-            return response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
-            ]) ;
-        }
-
-    }
-
-    public function store_image_cars($image , $car_id)
+    private function store_image($image , $id , $type)
     {
 
         try
@@ -186,11 +39,19 @@ class Posts extends Controller
             $path = $image->storeAs('images', $NewfileName, 'public');
 
 
-            \App\Models\Image::create([
-                'name'=>URL::asset('storage/' . $path) ,
-                'car_id'=>$car_id ,
-                'property_type' => 'car'
-            ]) ;
+            if($type == 'car')
+                \App\Models\Image::create([
+                    'name'=>URL::asset('storage/' . $path) ,
+                    'car_id'=>$id ,
+                    'property_type' => 'car'
+                ]) ;
+
+            elseif ($type == 'estate')
+                \App\Models\Image::create([
+                    'name'=>URL::asset('storage/' . $path) ,
+                    'estate_id'=>$id ,
+                    'property_type' => 'estate'
+                ]) ;
 
 
         } catch (\Exception $exception)
@@ -202,8 +63,161 @@ class Posts extends Controller
         }
     }
 
+    private function ValidateStoreCarRequest(Request $request)
+    {
+       return  Validator::make($request->all(), [
+
+            'operation_type' => 'required',
+            'transmission_type' =>'required',
+            'brand' => 'required',
+            'governorate'=>'required',
+            'description'=>'required',
+            'price'=>'required',
+            'kilometers' =>'required',
+            'year' => 'required' ,
+            'image' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image1' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image2' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image3' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image4' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image5' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image6' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image7' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image8' => 'mimes:jpeg,jpg,png,gif ' ,
+            'image9' => 'mimes:jpeg,jpg,png,gif '
+        ]);
+    }
+    public function store_car(Request $request)
+    {
+
+        try
+        {
+
+            $validate = $this->ValidateStoreCarRequest($request) ;
+
+            if ($validate->fails())
+                return response()->json([
+                    'Status' => false,
+                    'Validation Error' => $validate->errors()
+                ]);
+
+            // Store Car In Database
+            $id = Auth::id();
+
+            $Car = \App\Models\Car::create([
+
+                'owner_id'=> $id,
+                'operation_type' => $request['operation_type'],
+                'transmission_type' => $request['transmission_type'],
+                'brand'=> $request['brand'],
+                'secondary_brand'=> $request['secondary_brand'],
+                'governorate'=> $request['governorate'],
+                'locationInDamascus'=> $request['locationInDamascus'],
+                'color'=> $request['color'],
+                'description'=> $request['description'],
+                'price'=> $request['price'],
+                'kilometers'=> $request['kilometers'],
+                'address'=>  $request['address'] ,
+                'fuel_type' => $request['fuel_type'] ,
+                'status' => $request['status'] ,
+                'driving_force' => $request ['driving_force'] ,
+                'year'=> $request['year']
+            ]) ;
 
 
+            //Store Images
+            if ($request->hasFile('image'))
+            {
+                $this->store_image($request->file('image') , $Car->id, 'car') ;
+            }
+
+            if ($request->hasFile('image1'))
+            {
+                $this->store_image($request->file('image1'), $Car->id, 'car');
+            }
+
+            if ($request->hasFile('image2'))
+            {
+                $this->store_image($request->file('image2'), $Car->id, 'car');
+            }
+
+            if ($request->hasFile('image3'))
+            {
+                $this->store_image($request->file('image3'), $Car->id, 'car');
+            }
+            if ($request->hasFile('image4'))
+            {
+                $this->store_image($request->file('image4') , $Car->id, 'car') ;
+            }
+
+            if ($request->hasFile('image5'))
+            {
+                $this->store_image($request->file('image5'), $Car->id, 'car');
+            }
+
+            if ($request->hasFile('image6'))
+            {
+                $this->store_image($request->file('image6'), $Car->id, 'car');
+            }
+
+            if ($request->hasFile('image7'))
+            {
+                $this->store_image($request->file('image7'), $Car->id, 'car');
+            }
+            if ($request->hasFile('image8'))
+            {
+                $this->store_image($request->file('image8'), $Car->id , 'car');
+            }
+
+            if ($request->hasFile('image9'))
+            {
+                $this->store_image($request->file('image9'), $Car->id , 'car');
+            }
+
+            return response() ->json([
+                'Status' => true ,
+                'Car'=> $Car,
+                'images' => $Car->images()->get()
+            ],201) ;
+
+
+
+        }
+        catch (\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]) ;
+        }
+
+    }
+
+
+
+
+    private function ValidateStoreEstateRequest(Request $request)
+    {
+        return Validator::make($request->all(), [
+            'operation_type' => 'required',
+            'governorate'=>'required',
+            'description'=>'required',
+            'price'=>'required',
+            'space' => 'required' ,
+            'estate_type' => 'required' ,
+            'image' => 'mimes:jpeg,jpg,png,gif ',
+            'image1' => 'mimes:jpeg,jpg,png,gif' ,
+            'image2' => 'mimes:jpeg,jpg,png,gif'  ,
+            'image3' => 'mimes:jpeg,jpg,png,gif' ,
+            'image4' => 'mimes:jpeg,jpg,png,gif' ,
+            'image5' => 'mimes:jpeg,jpg,png,gif' ,
+            'image6' => 'mimes:jpeg,jpg,png,gif' ,
+            'image7' => 'mimes:jpeg,jpg,png,gif' ,
+            'image8' => 'mimes:jpeg,jpg,png,gif' ,
+            'image9' => 'mimes:jpeg,jpg,png,gif'
+
+        ]);
+    }
 
     public function store_estate(Request $request)
     {
@@ -213,26 +227,7 @@ class Posts extends Controller
             //Validate
             try
             {
-
-                $validate = Validator::make($request->all(), [
-                    'operation_type' => 'required',
-                    'governorate'=>'required',
-                    'description'=>'required',
-                    'price'=>'required',
-                    'space' => 'required' ,
-                    'estate_type' => 'required' ,
-                    'image' => 'mimes:jpeg,jpg,png,gif ',
-                    'image1' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image2' => 'mimes:jpeg,jpg,png,gif'  ,
-                    'image3' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image4' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image5' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image6' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image7' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image8' => 'mimes:jpeg,jpg,png,gif' ,
-                    'image9' => 'mimes:jpeg,jpg,png,gif'
-
-                ]);
+                $validate = $this->ValidateStoreEstateRequest($request) ;
                 if ($validate->fails())
                     return response()->json([
                         'Status' => false,
@@ -246,7 +241,6 @@ class Posts extends Controller
                 ]) ;
             }
             // create product
-
             try
             {
 
@@ -271,50 +265,50 @@ class Posts extends Controller
 
                 if ($request->hasFile('image'))
                 {
-                    $this->store_image_estate($request->file('image') , $estate->id) ;
+                    $this->store_image($request->file('image') , $estate->id , 'estate') ;
                 }
 
                 if ($request->hasFile('image1'))
                 {
-                    $this->store_image_estate($request->file('image1'), $estate->id);
+                    $this->store_image($request->file('image1'), $estate->id , 'estate');
                 }
 
                 if ($request->hasFile('image2'))
                 {
-                    $this->store_image_estate($request->file('image2'), $estate->id);
+                    $this->store_image($request->file('image2'), $estate->id , 'estate');
                 }
 
                 if ($request->hasFile('image3'))
                 {
-                    $this->store_image_estate($request->file('image3'), $estate->id);
+                    $this->store_image($request->file('image3'), $estate->id , 'estate');
                 }
                 if ($request->hasFile('image4'))
                 {
-                    $this->store_image_estate($request->file('image4') , $estate->id) ;
+                    $this->store_image($request->file('image4') , $estate->id , 'estate') ;
                 }
 
                 if ($request->hasFile('image5'))
                 {
-                    $this->store_image_estate($request->file('image5'), $estate->id);
+                    $this->store_image($request->file('image5'), $estate->id , 'estate');
                 }
 
                 if ($request->hasFile('image6'))
                 {
-                    $this->store_image_estate($request->file('image6'), $estate->id);
+                    $this->store_image($request->file('image6'), $estate->id , 'estate');
                 }
 
                 if ($request->hasFile('image7'))
                 {
-                    $this->store_image_estate($request->file('image7'), $estate->id);
+                    $this->store_image($request->file('image7'), $estate->id , 'estate');
                 }
                 if ($request->hasFile('image8'))
                 {
-                    $this->store_image_estate($request->file('image8'), $estate->id);
+                    $this->store_image($request->file('image8'), $estate->id , 'estate');
                 }
 
                 if ($request->hasFile('image9'))
                 {
-                    $this->store_image_estate($request->file('image9'), $estate->id);
+                    $this->store_image($request->file('image9'), $estate->id , 'estate');
                 }
 
 
@@ -344,55 +338,19 @@ class Posts extends Controller
 
     }
 
-    public function store_image_estate($image , $estate_id)
-    {
-        //validate Image
-        try
-        {
-            $path = Null;
 
-            //Get FileName with extension
-            $filenameWithExt = $image->getClientOriginalName();
-
-            //Get FileName without Extension
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-            //Get Extension
-            $Extension = $image->getClientOriginalExtension();
-
-            //New_File_Name
-            $NewfileName = $filename . '_' . time() . '_.' . $Extension;
-
-            //Upload Image
-            $path = $image->storeAs('images', $NewfileName , 'public');
-
-
-            //create Object in Database
-            \App\Models\Image::create([
-                'name'=>URL::asset('storage/' . $path),
-                'estate_id' => $estate_id,
-                'property_type' => 'estate'
-            ]);
-
-
-        } catch (\Exception $exception)
-        {
-            return response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
-            ]) ;
-        }
-    }
 
     public function Get_User_Cars($id)
     {
-        try{
+        try
+        {
+            $user= Auth::user() ;
+            $owner = User::find($id);
 
-            $user = User::find($id);
-
-            if ($user) {
+            if ($owner)
+            {
                 $postsWithImages = [];
-                foreach ($user->cars()->get() as $car) {
+                foreach ($owner->cars()->get() as $car) {
                     $images = $car->images()->get();
                     $favorite = $user->isCarFavorite($car);
                     $postWithImage = [
@@ -405,7 +363,7 @@ class Posts extends Controller
                 return response()->json([
                     'posts' => $postsWithImages
                 ]);
-            } else {
+            }else {
                 return response()->json([
                     'message' => 'User not found'
                 ]);
@@ -422,11 +380,12 @@ class Posts extends Controller
     public function Get_User_Estates($id)
     {
         try{
-            $user = User::find($id);
+            $user = Auth::user() ;
+            $owner = User::find($id);
 
-            if ($user) {
+            if ($owner) {
                 $postsWithImages = [];
-                foreach ($user->estates()->get() as $estate) {
+                foreach ($owner->estates()->get() as $estate) {
                     $images = $estate->images()->get();
                     $favorite = $user->isEstateFavorite($estate);
                     $postWithImage = [
@@ -453,34 +412,34 @@ class Posts extends Controller
         }
     }
 
-    public function remove_estate_posts($post_id)
+    public function remove_estate_post($post_id)
     {
         try{
             $post = Estate::find($post_id);
-            if (!$post) {
+            if (!$post)
+            {
                 return response()->json([
                     'Message' => 'Post Not Exist'
                 ]);
             }
 
-            $owner_id = $post['owner_id'];
 
-            try {
-                if ($owner_id == Auth::id() or \auth()->user()->role = 'admin') {
-                    $post->delete();
+            if ($post->owner_id == Auth::id() || \auth()->user()->role == 'admin')
+            {
+                $post->delete();
 
-                    return response()->json([
-                        'Status' => true,
-                        'Message' => 'Deleted Successfully'
-                    ]);
-
-                }
-            } catch (\Exception $exception) {
+                return response()->json([
+                    'Status' => true,
+                    'Message' => 'Deleted Successfully'
+                ]);
+            }else
+            {
                 return response()->json([
                     'Status' => false,
-                    'Error' => $exception->getMessage()
+                    'Message' => 'Denied'
                 ]);
             }
+
         }catch (\Throwable $exception)
         {
             return response()->json([
@@ -490,7 +449,7 @@ class Posts extends Controller
         }
     }
 
-    public function remove_car_posts($post_id)
+    public function remove_car_post($post_id)
     {
         try
         {
@@ -502,8 +461,7 @@ class Posts extends Controller
                 ]) ;
             }
 
-            $owner_id  = $post['owner_id'] ;
-            if ($owner_id == Auth::id() or \auth()->user()->role = 'admin')
+            if ($post->owner_id == Auth::id() || \auth()->user()->role == 'admin')
             {
                 $post->delete() ;
 
@@ -511,6 +469,12 @@ class Posts extends Controller
                     'Status' => true ,
                     'Message' => 'Deleted Successfully'
                 ]) ;
+            }else
+            {
+                return response()->json([
+                    'Status' => false,
+                    'Message' => 'Denied'
+                ]);
             }
 
         }catch(\Exception $exception)
@@ -527,16 +491,19 @@ class Posts extends Controller
         try{
             $user = Auth::user();
             $car = Car::find($car_id);
-            if ($car) {
+            if ($car)
+            {
+                $car_image = $car->images()->get() ;
+                $car_owner = $car->owner()->get() ;
                 $favorite = $user->isCarFavorite($car);
                 return \response()->json([
                     'Status' => true,
                     'Car : ' => $car,
-                    'images : ' => $car->images,
-                    'Owner : ' => $car->owner,
+                    'images : ' => $car_image,
+                    'Owner : ' => $car_owner,
                     'favorite' => $favorite
                 ]);
-            } else {
+            }else {
                 return \response()->json([
                     'Status' => false,
                     'Car : ' => "Car Not exist"
@@ -553,25 +520,28 @@ class Posts extends Controller
 
     public function get_estate($estate_id)
     {
-        try{
+        try
+        {
             $user = Auth::user();
             $estate = Estate::find($estate_id);
+            $estateimage = $estate->images()->get() ;
+            $estateowner = $estate->owner()->get() ;
             if ($estate) {
                 $favorite = $user->isEstateFavorite($estate);
-                return \response()->json([
+                return response()->json([
                     'Status' => true,
-                    'Estate : ' => $estate,
-                    'images' => $estate->images,
-                    'Owner : ' => $estate->owner,
+                    'Estate' => $estate,
+                    'images' => $estateimage,
+                    'owner' => $estateowner,
                     'favorite' => $favorite
                 ]);
             } else {
-                return \response()->json([
+                return response()->json([
                     'Status' => false,
-                    'Estate : ' => "Estate Not exist"
+                    'Estate' => "Estate does not exist"
                 ]);
             }
-        }catch (\Throwable $exception)
+     }catch (\Throwable $exception)
         {
             return response()->json([
                 'Status' => false ,
@@ -623,8 +593,8 @@ class Posts extends Controller
                     return response()->json([
                         'Message' => 'Estate Not Exist'
                     ]) ;
-            }
-            else if($request['type'] == 'car') {
+            }elseif($request['type'] == 'car')
+            {
                 $car = Car::find($request['car_id']) ;
                 if($car)
                     Rate::updateOrCreate([
@@ -666,10 +636,12 @@ class Posts extends Controller
     public function Get_Rate(Request $request){
         try
         {
+
             $validate = Validator::make($request->all() ,
                 [
                     'type' => 'Required | in:estate,car',
-
+                    'estate_id' => 'exists:estates,id' ,
+                    'car_id' => 'exists:cars,id'
                 ]) ;
 
             if($validate->fails())
@@ -688,17 +660,22 @@ class Posts extends Controller
                 $sum = Rate::where('estate_id', '=', $request['estate_id'])->sum('rate') ;
             }
 
-            else if($request['type'] == 'car')
+            elseif($request['type'] == 'car')
             {
                 $count = Rate::where('car_id', '=', $request['car_id'])->count() ;
                 $sum = Rate::where('car_id', '=', $request['car_id'])->sum('rate') ;
             }
 
-            return response()->json([
-                'Status' => true ,
-                'rate' => $sum/$count
-            ]) ;
-
+            if($count == 0)
+                return response()->json([
+                    'Status' => true ,
+                    'rate' => 0
+                ]) ;
+            else
+                return response()->json([
+                    'Status' => true ,
+                    'rate' => $sum/$count
+                ]) ;
 
         }catch (\Exception $exception)
         {
@@ -757,7 +734,7 @@ class Posts extends Controller
                     'favorite_estates : ' => $estatesWithImages
                 ]) ;
 
-            }else if($request['type'] == 'car')
+            }elseif($request['type'] == 'car')
             {
                 $Cars = Car::join('favorites', 'cars.id', '=', 'favorites.car_id')
                     ->where('favorites.user_id', '=', $user_id)
@@ -784,7 +761,7 @@ class Posts extends Controller
                     'favorite_cars : ' => $CarsWithImages
                 ]) ;
 
-            }else if($request['type'] == 'all')
+            }elseif($request['type'] == 'all')
             {
                 $Estates = Estate::join('favorites', 'estates.id', '=', 'favorites.estate_id')
                     ->where('favorites.user_id', '=', $user_id)
@@ -873,7 +850,7 @@ class Posts extends Controller
                         'Message' => 'Estate Not Exist'
                     ]) ;
             }
-            else if($request['type'] == 'car')
+            elseif($request['type'] == 'car')
             {
                 $car = Car::find($request['id']) ;
                 if($car)
@@ -959,7 +936,7 @@ class Posts extends Controller
                          'Message' => 'Car Not Exist'
                      ]) ;
                 }
-            }else if ($request['type']== 'estate')
+            }elseif ($request['type']== 'estate')
             {
                 $estate = Estate::find($request['id']) ;
                 if ($estate)
@@ -1003,7 +980,7 @@ class Posts extends Controller
                         'Message' => 'Car Not Exist'
                     ]);
 
-            } else if ($request['type'] == 'estate') {
+            } elseif ($request['type'] == 'estate') {
                 $estate = Estate::find($request['id']);
                 if ($estate) {
                     if ($estate['owner_id'] == $user_id)

@@ -8,9 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Pusher\Pusher;
 use TheSeer\Tokenizer\Exception;
-use function Ramsey\Collection\add;
 
 class ChatController extends Controller
 {
@@ -25,7 +23,6 @@ class ChatController extends Controller
 
         try{
             $validatedData = Validator::make($request->all() , [
-
                 'receiver_id' => 'required|exists:users,id',
                 'message' => 'required|string | max : 600',
             ]);
@@ -46,7 +43,9 @@ class ChatController extends Controller
 
             event(new NewMessage($chat));
 
-            return response()->json($chat, 201);
+            return response()->json([
+                'Chat : ' => $chat
+            ], 201);
         }catch (Exception $exception)
         {
             return  response()->json([

@@ -69,6 +69,12 @@ class User extends Authenticatable
 
     public function delete()
     {
+        if($this->image !=null)
+        {
+            $imagePath = str_replace('/storage', '', parse_url($this->image, PHP_URL_PATH));
+            Storage::delete($imagePath) ;
+        }
+
         // delete images for all cars
         $this->cars->each(function ($car) {
             $car->images->each(function ($image) {
@@ -90,7 +96,9 @@ class User extends Authenticatable
 
         // delete the user
         parent::delete();
+
     }
+
     public function updatePassword($newPassword)
     {
         $this->password = Hash::make($newPassword);
@@ -112,7 +120,7 @@ class User extends Authenticatable
         $faker = Faker::create();
         $this->name = $faker->name;
         $this->email = $faker->email;
-        $this->password = Hash::make($faker->password);
+        $this->password = Hash::make(123456789);
         $this->phone_number = $faker->phoneNumber;
         $this->image = $faker->imageUrl;
         $this->facebook_URL = $faker->url;

@@ -50,6 +50,15 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/Profile.php')) ;
 
+            Route::middleware(['api' , 'auth:sanctum', 'verify'])
+                ->prefix('PMS')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/chat.php')) ;
+
+            Route::middleware(['api' , 'auth:sanctum', 'verify'])
+                ->prefix('PMS')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/favorite_rate.php')) ;
 
         });
     }

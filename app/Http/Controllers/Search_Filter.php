@@ -13,157 +13,177 @@ use Illuminate\Support\Facades\Validator;
 
 class Search_Filter extends Controller
 {
+    private function GetCarsWithImages($posts)
+    {
+        $user = Auth::user();
+
+        $postsWithImages = [];
+
+        foreach ($posts as $car) {
+            $images = $car->images()->get();
+            $favorite = $user->isCarFavorite($car);
+            $postWithImage = [
+                'post' => $car,
+                'images' => $images,
+                'favorite' => $favorite
+            ];
+            array_push($postsWithImages, $postWithImage);
+        }
+        return $postsWithImages;
+
+    }
+
+    private function GetEstateWithImages($posts)
+    {
+        $user = Auth::user();
+        $postsWithImages = [];
+
+        foreach ($posts as $estate) {
+            $images = $estate->images()->get();
+            $favorite = $user->isEstateFavorite($estate);
+            $postWithImage = [
+                'post' => $estate,
+                'images' => $images,
+                'favorite' => $favorite
+            ];
+            array_push($postsWithImages, $postWithImage);
+        }
+        return $postsWithImages;
+    }
 
     public function Filter(Request $request)
     {
-        try
-        {
-            $user = Auth::user() ;
-            if ($request['type'] == 'estate' )
-            {
+        try {
+            $validate = Validator::make($request->all(), [
+                'type' => 'required | in:estate,car',
+            ]);
+            if ($validate->fails())
+                return response()->json([
+                    'Status' => false,
+                    'Validation Error' => $validate->errors()
+                ]);
 
-                $post = \App\Models\Estate::all() ;
+            $user = Auth::user();
+            if ($request['type'] == 'estate') {
+
+                $post = \App\Models\Estate::all();
                 if ($request['estate_type'] != null)
-                    $post = \App\Models\Estate::where('estate_type' , $request['estate_type']);
+                    $post = \App\Models\Estate::where('estate_type', $request['estate_type']);
 
                 if ($request['operation_type'] != null)
-                    $post = $post->where('operation_type' , $request['operation_type']) ;
+                    $post = $post->where('operation_type', $request['operation_type']);
 
                 if ($request['location'] != null)
-                    $post = $post->where('location' , $request['location'] );
+                    $post = $post->where('location', $request['location']);
 
                 if ($request['locationInDamascus'] != null)
-                    $post = $post->where('locationInDamascus' , $request['locationInDamascus']) ;
+                    $post = $post->where('locationInDamascus', $request['locationInDamascus']);
 
-                if ($request['max_price']!=null)
-                    $post = $post->where('price' , '<' , $request['max_price']) ;
+                if ($request['max_price'] != null)
+                    $post = $post->where('price', '<', $request['max_price']);
 
-                if ($request['min_price']!=null)
-                    $post = $post->where('price' , '>' , $request['min_price']) ;
+                if ($request['min_price'] != null)
+                    $post = $post->where('price', '>', $request['min_price']);
 
-                if ($request['max_space']!=null)
-                    $post = $post->where('space' , '<' , $request['max_space']) ;
+                if ($request['max_space'] != null)
+                    $post = $post->where('space', '<', $request['max_space']);
 
-                if ($request['min_space']!=null)
-                    $post = $post->where('space' , '>' , $request['max_space']) ;
+                if ($request['min_space'] != null)
+                    $post = $post->where('space', '>', $request['max_space']);
 
 
-                if ($request['max_level']!=null)
-                    $post = $post->where('level' , '<' , $request['max_level']) ;
+                if ($request['max_level'] != null)
+                    $post = $post->where('level', '<', $request['max_level']);
 
-                if ($request['min_level']!=null)
-                    $post = $post->where('level' , '>' , $request['min_level']) ;
+                if ($request['min_level'] != null)
+                    $post = $post->where('level', '>', $request['min_level']);
 
                 if ($request['status'] != null)
-                    $post =  $post->where('status' , $request['status']) ;
+                    $post = $post->where('status', $request['status']);
 
-                if($post)
-                {
-                    $postsWithImages = [] ;
-                    foreach ($post as $estate) {
-                        $images = $estate->images()->get();
-                        $favorite = $user->isEstateFavorite($estate) ;
-                        $postWithImage = [
-                            'post' => $estate,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        array_push($postsWithImages, $postWithImage);
-                    }
+                if ($post) {
 
                     return response()->json([
-                        'Status'=>true ,
-                        'Posts'=> $postsWithImages
-                    ],201) ;
+                        'Status' => true,
+                        'Posts' => $this->GetEstateWithImages($post)
+                    ], 201);
 
                 }
             }
 
 
-            if ($request['type'] == 'car' )
-            {
-                $post = \App\Models\Car::all() ;
+            if ($request['type'] == 'car') {
+                $post = \App\Models\Car::all();
 
                 if ($request['operation_type'] != null)
-                    $post = $post->where('operation_type' , $request['operation_type']) ;
+                    $post = $post->where('operation_type', $request['operation_type']);
 
                 if ($request['transmission_type'] != null)
-                    $post =  $post->where('transmission_type' , $request['transmission_type']) ;
+                    $post = $post->where('transmission_type', $request['transmission_type']);
 
                 if ($request['fuel_type'] != null)
-                    $post =  $post->where('fuel_type' , $request['fuel_type']) ;
+                    $post = $post->where('fuel_type', $request['fuel_type']);
 
                 if ($request['status'] != null)
-                    $post =  $post->where('status' , $request['status']) ;
+                    $post = $post->where('status', $request['status']);
 
                 if ($request['driving_force'] != null)
-                    $post =  $post->where('driving_force' , $request['driving_force']) ;
+                    $post = $post->where('driving_force', $request['driving_force']);
 
 
                 if ($request['brand'] != null)
-                    $post =  $post->where('brand' , $request['brand']) ;
+                    $post = $post->where('brand', $request['brand']);
 
                 if ($request['secondary_brand'] != null)
-                    $post =  $post->where('secondary_brand' , $request['secondary_brand']) ;
+                    $post = $post->where('secondary_brand', $request['secondary_brand']);
 
                 if ($request['color'] != null)
-                    $post =  $post->where('color' , $request['color']) ;
+                    $post = $post->where('color', $request['color']);
 
                 if ($request['location'] != null)
-                    $post =  $post->where('location' , $request['location'] );
+                    $post = $post->where('location', $request['location']);
 
                 if ($request['locationInDamascus'] != null)
-                    $post =  $post->where('locationInDamascus' , $request['locationInDamascus']) ;
+                    $post = $post->where('locationInDamascus', $request['locationInDamascus']);
 
-                if ($request['max_year']!=null)
-                    $post = $post->where('year' , '<' , $request['max_year']) ;
+                if ($request['max_year'] != null)
+                    $post = $post->where('year', '<', $request['max_year']);
 
-                if ($request['min_year']!=null)
-                    $post = $post->where('year' , '>' , $request['min_year']) ;
-
-
-                if ($request['max_price']!=null)
-                    $post = $post->where('price' , '<' , $request['max_price']) ;
+                if ($request['min_year'] != null)
+                    $post = $post->where('year', '>', $request['min_year']);
 
 
-                if ($request['min_price']!=null)
-                    $post = $post->where('price' , '>' , $request['min_price']) ;
+                if ($request['max_price'] != null)
+                    $post = $post->where('price', '<', $request['max_price']);
 
-                if ($request['max_kilometers']!=null)
-                    $post = $post->where('kilometers' , '<' , $request['max_kilometers']) ;
 
-                if($post)
-                {
-                    $postsWithImages = [] ;
-                    foreach ($post as $car) {
-                        $images = $car->images()->get();
-                        $favorite = $user->isCarFavorite($car) ;
-                        $postWithImage = [
-                            'post' => $car,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        array_push($postsWithImages, $postWithImage);
-                    }
+                if ($request['min_price'] != null)
+                    $post = $post->where('price', '>', $request['min_price']);
+
+                if ($request['max_kilometers'] != null)
+                    $post = $post->where('kilometers', '<', $request['max_kilometers']);
+
+                if ($post) {
 
                     return response()->json([
-                        'Status'=>true ,
-                        'Posts'=> $postsWithImages
-                    ],201) ;
+                        'Status' => true,
+                        'Posts' => $this->GetCarsWithImages($post)
+                    ], 201);
 
                 }
 
             }
-        }
-        catch (\Exception $exception){
+        } catch (\Exception $exception) {
 
             return response()->json([
-                'Status' => false ,
+                'Status' => false,
                 'Message' => $exception->getMessage()
-            ]) ;
+            ]);
         }
 
     }
+
+
 
     public function Search(Request $request)
     {
@@ -179,59 +199,27 @@ class Search_Filter extends Controller
                     'Validation Error' => $validate->errors()
                 ]);
 
-            $user =Auth::user() ;
-             if ($request['type'] == 'car' )
+            if ($request['type'] == 'car' )
             {
-                $post = Car::where('description' ,'like' ,'%'.$request['description'].'%') ->orWhere('address' ,'like' ,'%'.$request['description'].'%')->get();
-                if($post)
-                {
-                    $postsWithImages = [] ;
-
-                    foreach ($post as $car) {
-                        $images = $car->images()->get();
-                        $favorite = $user->isCarFavorite($car) ;
-                        $postWithImage = [
-                            'post' => $car,
-                            'images' => $images ,
-                            'favorite' => $favorite
-                        ];
-                        array_push($postsWithImages, $postWithImage);
-                    }
-
+                $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                if ($posts) {
                     return response()->json([
-                        'Status'=>true ,
-                        'Posts'=> $postsWithImages
-                    ],201) ;
-
+                        'Status' => true,
+                        'Posts' => $this->GetCarsWithImages($posts)
+                    ], 201);
                 }
             }
             if ($request['type'] == 'estate' )
             {
-                $post = Estate::where('description' ,'like' ,'%'.$request['description'].'%')->orWhere('address' ,'like' ,'%'.$request['description'].'%')->get();
-                if($post)
-                {
-                    $postsWithImages = [] ;
-
-                    foreach ($post as $estate) {
-                        $images = $estate->images()->get();
-                        $favorite = $user->isEstateFavorite($estate) ;
-                        $postWithImage = [
-                            'post' => $estate,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        array_push($postsWithImages, $postWithImage);
-                    }
-
+                $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                if ($posts) {
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $postsWithImages
+                        'Posts'=> $this->GetEstateWithImages($posts)
                     ],201) ;
                 }
             }
-
-        }
-        catch (\Exception $exception){
+        }catch (\Exception $exception){
 
             return response()->json([
                 'Status' => false ,
@@ -239,4 +227,5 @@ class Search_Filter extends Controller
             ]) ;
         }
     }
+
 }

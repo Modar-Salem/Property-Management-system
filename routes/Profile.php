@@ -12,22 +12,17 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-route::get('RemoveUser/{id}' , [\App\Http\Controllers\Register::class , 'destroy']) ;
+route::get('RemoveUser/{id}' , [\App\Http\Controllers\Profile::class , 'destroy']) ;
 
-route::post('UpdateProfile' , [\App\Http\Controllers\Register::class , 'update']) ;
+route::post('UpdateProfile' , [\App\Http\Controllers\Profile::class , 'update']) ;
 
-route::post('Insert_Image' , [\App\Http\Controllers\Register::class , 'insert_image']) ;
+route::post('Insert_Image' , [\App\Http\Controllers\Profile::class , 'insert_image']) ;
 
-route::get('GetUser/{id}' , [\App\Http\Controllers\Register::class , 'GetUser']) ;
+route::get('GetUser/{id}' , [\App\Http\Controllers\Profile::class , 'GetUser']) ;
 
-route::get('profile' , [\App\Http\Controllers\Register::class , 'profile']) ;
+route::get('profile' , [\App\Http\Controllers\Profile::class , 'profile']) ;
 
-route::post('reset_password' , [\App\Http\Controllers\Register::class , 'resetPassword']) ;
+route::post('reset_password' , [\App\Http\Controllers\Profile::class , 'resetPassword']) ;
 
-route::post('My_posts' , [\App\Http\Controllers\Register::class , 'my_posts']) ;
+route::post('My_posts' , [\App\Http\Controllers\Profile::class , 'my_posts']) ;
 
-Route::post('sendMessage', [\App\Http\Controllers\ChatController::class, 'sendMessage']) ;
-
-route::post('getConversation', [\App\Http\Controllers\ChatController::class, 'getConversation']) ;
-
-route::get('getChattedPersons', [\App\Http\Controllers\ChatController::class, 'getChattedPersons']) ;
