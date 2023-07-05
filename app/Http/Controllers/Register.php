@@ -105,7 +105,7 @@ class Register extends Controller
                 $path = $this->store_image($request) ;
 
                 //store image in database
-                $user = \App\Models\User::find($User['id'])
+                \App\Models\User::find($User['id'])
                     ->update(
                         ['image' => URL::asset('/storage/' . $path)]
                     );
@@ -113,7 +113,7 @@ class Register extends Controller
 
                 return response()->json([
                         'Status' => true,
-                        'User' => $user,
+                        'User' => $User,
                         "Token" => $token,
                         'Message' => 'Image are inserted Successfully',
                 ]);

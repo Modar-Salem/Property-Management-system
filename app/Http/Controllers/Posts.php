@@ -500,7 +500,7 @@ class Posts extends Controller
                     'Status' => true,
                     'Car : ' => $car,
                     'images : ' => $car_image,
-                    'Owner : ' => $car_owner,
+                    'Owner : ' => $car_owner[0],
                     'favorite' => $favorite
                 ]);
             }else {
@@ -532,7 +532,7 @@ class Posts extends Controller
                     'Status' => true,
                     'Estate' => $estate,
                     'images' => $estateimage,
-                    'owner' => $estateowner,
+                    'owner' => $estateowner[0],
                     'favorite' => $favorite
                 ]);
             } else {

@@ -14,6 +14,7 @@ class Profile extends Controller
 {
 
 
+
     public function profile()
     {
         try
@@ -60,6 +61,32 @@ class Profile extends Controller
         }
     }
 
+    private function validateImageRequest(Request $request)
+    {
+        return Validator::make($request->all(), [
+            'image' => 'mimes:jpeg,jpg,png',
+        ]);
+    }
+    private function store_image(Request $request)
+    {
+
+        $image = $request->file('image');
+
+        //Get FileName with extension
+        $filenameWithExt = $image->getClientOriginalName();
+
+        //Get FileName without Extension
+        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+        //Get Extension
+        $Extension = $image->getClientOriginalExtension();
+
+        //New_File_Name
+        $NewfileName = $filename . '_' . time() . '_.' . $Extension;
+
+        //Upload Image
+        return $path = $image->storeAs('images', $NewfileName, 'public');
+    }
     public function insert_image(Request $request)
     {
         $user_id = Auth::id() ;
@@ -88,8 +115,7 @@ class Profile extends Controller
                 //create Object in Database
                 $user->update(['image' => URL::asset('storage/' . $path)]);
 
-                if($user)
-                    return response()->json([
+                return response()->json([
                         'Status' => true ,
                         'Message' => 'Image are inserted Successfully' ,
                     ]) ;

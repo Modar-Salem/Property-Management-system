@@ -25,7 +25,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
-                // You can add more fields as per your user model
+                'password' => '123456789'
             ]);
         }
 
@@ -33,6 +33,7 @@ class AuthController extends Controller
         $token = $user->createToken('api')->plainTextToken;
 
         // Return the token to the user or perform any desired redirect or response
-        return response()->json(['token' => $token]);
+        return response()->json(['User' => $user
+            , 'token' => $token]);
     }
 }

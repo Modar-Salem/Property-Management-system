@@ -20,7 +20,7 @@ class verify2
     {
 
         $user = Auth::user() ;
-        if($user['email_verified_at'] == null)
+        if($user['email_verified_at'] != null)
         {
             return \response()->json([
                 'Message' => 'Email Not Verified'

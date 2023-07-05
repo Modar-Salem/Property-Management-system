@@ -201,7 +201,7 @@ class Search_Filter extends Controller
 
             if ($request['type'] == 'car' )
             {
-                $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                $posts = Car::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts) {
                     return response()->json([
                         'Status' => true,
