@@ -183,7 +183,7 @@ class Register extends Controller
 
         try{
             $validator = Validator::make($request->all(), [
-                'email' => 'required | exists:users,email',
+                'email' => 'required |email |exists:users,email',
                 'code' => 'required|string|exists:verify,code'
             ]);
 
@@ -265,7 +265,7 @@ class Register extends Controller
     private function validateLogInRequest(Request $request)
     {
         return Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|email |exists:users,email',
             'password' => 'required|string|min:8|max:34',
         ]);
     }
@@ -286,6 +286,13 @@ class Register extends Controller
                     'Status' => false ,
                     'Validation Error' => $validate->errors()
                 ]) ;
+
+            $user = User::where('email' , $request['email']) ;
+            if($user['google_id'] != null)
+                return response()->json([
+                   'Status' => false
+                    ,'You can access with this email only with Gmail-SignUp'
+                ]);
 
             $credentials = $request->only('email', 'password');
 

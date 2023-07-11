@@ -25,7 +25,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
-                'password' => '123456789'
+                'google_id' => $googleUser->getId()
             ]);
         }
 
