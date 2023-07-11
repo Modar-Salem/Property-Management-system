@@ -287,11 +287,11 @@ class Register extends Controller
                     'Validation Error' => $validate->errors()
                 ]) ;
 
-            $user = User::where('email' , $request['email']) ;
-            if($user['google_id'] != null)
+            $user = User::where('email' , $request['email'])->get();
+            if($user[0]->google_id != null)
                 return response()->json([
                    'Status' => false
-                    ,'You can access with this email only with Gmail-SignUp'
+                    ,'Message'=>'You can access with this email only with Gmail'
                 ]);
 
             $credentials = $request->only('email', 'password');

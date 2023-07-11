@@ -19,13 +19,12 @@ class AuthController extends Controller
 
         // Check if the user already exists in your database
         $user = User::where('email', $googleUser->getEmail())->first();
-
         if (!$user) {
             // Create a new user record
             $user = User::create([
                 'name' => $googleUser->getName(),
                 'email' => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId()
+                'google_id' => (string) $googleUser->getId()
             ]);
         }
 
