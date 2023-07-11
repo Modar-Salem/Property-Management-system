@@ -36,9 +36,5 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
-    'vonage' => [
-        'api_key' => env('VONAGE_API_KEY'),
-        'api_secret' => env('VONAGE_API_SECRET'),
-        'sms_from' => env('VONAGE_SMS_FROM'),
-    ]
+
 ];
