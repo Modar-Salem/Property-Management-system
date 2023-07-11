@@ -73,8 +73,8 @@ class Search_Filter extends Controller
                 if ($request['operation_type'] != null)
                     $post = $post->where('operation_type', $request['operation_type']);
 
-                if ($request['location'] != null)
-                    $post = $post->where('location', $request['location']);
+                if ($request['governorate'] != null)
+                    $post = $post->where('governorate', $request['governorate']);
 
                 if ($request['locationInDamascus'] != null)
                     $post = $post->where('locationInDamascus', $request['locationInDamascus']);
@@ -130,7 +130,6 @@ class Search_Filter extends Controller
                 if ($request['driving_force'] != null)
                     $post = $post->where('driving_force', $request['driving_force']);
 
-
                 if ($request['brand'] != null)
                     $post = $post->where('brand', $request['brand']);
 
@@ -140,8 +139,8 @@ class Search_Filter extends Controller
                 if ($request['color'] != null)
                     $post = $post->where('color', $request['color']);
 
-                if ($request['location'] != null)
-                    $post = $post->where('location', $request['location']);
+                if ($request['governorate'] != null)
+                    $post = $post->where('governorate', $request['governorate']);
 
                 if ($request['locationInDamascus'] != null)
                     $post = $post->where('locationInDamascus', $request['locationInDamascus']);
@@ -152,10 +151,8 @@ class Search_Filter extends Controller
                 if ($request['min_year'] != null)
                     $post = $post->where('year', '>', $request['min_year']);
 
-
                 if ($request['max_price'] != null)
                     $post = $post->where('price', '<', $request['max_price']);
-
 
                 if ($request['min_price'] != null)
                     $post = $post->where('price', '>', $request['min_price']);

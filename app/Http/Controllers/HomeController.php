@@ -35,10 +35,12 @@ class HomeController extends Controller
                 ->get();
 
 
+            $existingPostIds = []; // Track existing post IDs
 
             foreach ($favorites_location as $favorite) {
                 $posts = Estate::where('governorate', $favorite->governorate)->get();
                 foreach ($posts as $post) {
+                    $existingPostIds[] = $post->id; // Add post ID to existing post IDs
                     $images = $post->images()->get();
                     $favorite = $user->isEstateFavorite($post) ;
                     $postWithImage = [
@@ -59,29 +61,39 @@ class HomeController extends Controller
                 ->get();
 
 
-            foreach ($Top_Rating_Posts as $rating) {
+            foreach ($Top_Rating_Posts as $rating)
+            {
                 $estate = Estate::find($rating->estate_id);
-                $images = $estate->images()->get();
-                $favorite = $user->isEstateFavorite($estate) ;
-                $postWithImage = [
-                    'post' => $estate,
-                    'images' => $images,
-                    'favorite' => $favorite
-                ];
-                $postsWithImages->push($postWithImage);
+
+                if (!in_array($estate->id, $existingPostIds))
+                {
+                    $existingPostIds[] = $estate->id; // Add post ID to existing post IDs
+                    $images = $estate->images()->get();
+                    $favorite = $user->isEstateFavorite($estate) ;
+                    $postWithImage = [
+                        'post' => $estate,
+                        'images' => $images,
+                        'favorite' => $favorite
+                    ];
+                    $postsWithImages->push($postWithImage);
+                }
             }
 
             $All_Estate = Estate::all();
 
-            foreach ($All_Estate as $estate) {
-                $images = $estate->images()->get();
-                $favorite = $user->isEstateFavorite($estate) ;
-                $postWithImage = [
-                    'post' => $estate,
-                    'images' => $images ,
-                    'favorite' => $favorite
-                ];
-                $postsWithImages->push($postWithImage);
+            foreach ($All_Estate as $estate)
+            {
+                if (!in_array($estate->id, $existingPostIds))
+                {
+                    $images = $estate->images()->get();
+                    $favorite = $user->isEstateFavorite($estate);
+                    $postWithImage = [
+                        'post' => $estate,
+                        'images' => $images,
+                        'favorite' => $favorite
+                    ];
+                    $postsWithImages->push($postWithImage);
+                }
             }
 
             $perPage = 4;
@@ -94,7 +106,7 @@ class HomeController extends Controller
                 'AllPost' => $relatedPosts
             ]);
 
-        } catch (\Throwable $exception) {
+        }catch (\Throwable $exception) {
             return response()->json([
                 'Status' => false,
                 'Error Message' => $exception->getMessage(),
@@ -105,63 +117,71 @@ class HomeController extends Controller
     public function Car_Home()
     {
         try {
-            $user_id = Auth::id();
-            $user= Auth::user() ;
-            $favorites_location = DB::table('favorites')
-                ->join('cars', 'favorites.car_id', '=', 'cars.id')
-                ->where('favorites.user_id', '=', $user_id)
-                ->select('cars.governorate')
-                ->get();
+                $user_id = Auth::id();
+                $user= Auth::user() ;
+                $favorites_location = DB::table('favorites')
+                    ->join('cars', 'favorites.car_id', '=', 'cars.id')
+                    ->where('favorites.user_id', '=', $user_id)
+                    ->select('cars.governorate')
+                    ->get();
 
-            $postsWithImages = collect();
+                $postsWithImages = collect();
+                $existingPostIds = [];
 
-            foreach ($favorites_location as $favorite) {
-                $posts = Car::where('governorate', $favorite->governorate)->get();
-                foreach ($posts as $post) {
-                    $images = $post->images()->get();
-                    $favorite = $user->isCarFavorite($post) ;
-                    $postWithImage = [
-                        'post' => $post,
-                        'images' => $images,
-                        'favorite' => $favorite
-                    ];
-                    $postsWithImages->push($postWithImage);
+                    foreach ($favorites_location as $favorite) {
+                    $posts = Car::where('governorate', $favorite->governorate)->get();
+                    foreach ($posts as $post) {
+                        $existingPostIds[] = $post->id; // Add post ID to existing post IDs
+                        $images = $post->images()->get();
+                        $favorite = $user->isCarFavorite($post) ;
+                        $postWithImage = [
+                            'post' => $post,
+                            'images' => $images,
+                            'favorite' => $favorite
+                        ];
+                        $postsWithImages->push($postWithImage);
+                    }
                 }
-            }
 
-            $Top_Rating_Posts = DB::table('rates')
-                ->join('cars', 'rates.car_id', '=', 'cars.id')
-                ->where('rates.property_type', '=', 'car')
-                ->select('car_id', DB::raw('AVG(rate) as average_rate'))
-                ->groupBy('car_id')
-                ->orderByDesc('average_rate')
-                ->get();
+                $Top_Rating_Posts = DB::table('rates')
+                    ->join('cars', 'rates.car_id', '=', 'cars.id')
+                    ->where('rates.property_type', '=', 'car')
+                    ->select('car_id', DB::raw('AVG(rate) as average_rate'))
+                    ->groupBy('car_id')
+                    ->orderByDesc('average_rate')
+                    ->get();
 
-            foreach ($Top_Rating_Posts as $rating) {
-                $car = Car::find($rating->car_id);
-                $images = $car->images()->get();
-                $favorite = $user->isCarFavorite($car) ;
-                $postWithImage = [
-                    'post' => $car,
-                    'images' => $images,
-                    'favorite' => $favorite
-                ];
-                $postsWithImages->push($postWithImage);
-            }
+                foreach ($Top_Rating_Posts as $rating) {
+                    $car = Car::find($rating->car_id);
+                    if (!in_array($car->id, $existingPostIds)) {
+                        $existingPostIds[] = $car->id; // Add post ID to existing post IDs
+                        $images = $car->images()->get();
+                        $favorite = $user->isCarFavorite($car);
+                        $postWithImage = [
+                            'post' => $car,
+                            'images' => $images,
+                            'favorite' => $favorite
+                        ];
+                        $postsWithImages->push($postWithImage);
+                    }
+                }
 
-            $All_Car = Car::all();
+                $All_Car = Car::all();
 
-            foreach ($All_Car as $car) {
-                $images = $car->images()->get();
-                $favorite = $user->isCarFavorite($car) ;
-                $postWithImage = [
-                    'post' => $car,
-                    'images' => $images,
-                    'favorite' => $favorite
-                ];
-                $postsWithImages->push($postWithImage);
-            }
+                foreach ($All_Car as $car) {
+                    if (!in_array($car->id, $existingPostIds))
+                    {
+                        $images = $car->images()->get();
+                        $favorite = $user->isCarFavorite($car);
+                        $postWithImage = [
+                            'post' => $car,
+                            'images' => $images,
+                            'favorite' => $favorite
+                        ];
+                        $postsWithImages->push($postWithImage);
 
+                    }
+                }
                 $perPage = 4;
                 $currentPage = Paginator::resolveCurrentPage() ?: 1;
                 $items = $postsWithImages->all();
@@ -179,5 +199,4 @@ class HomeController extends Controller
                 ]);
             }
     }
-
 }

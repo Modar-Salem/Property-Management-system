@@ -58,7 +58,7 @@ class Car extends Model
     public function generateFakeData()
     {
         $faker = Faker::create();
-        $this->owner_id = $faker->numberBetween(1, 10);
+        $this->owner_id = $faker->numberBetween(1, 100);
 
         $this->operation_type = $faker->randomElement(['sell', 'rent ']);
 

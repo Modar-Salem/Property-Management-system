@@ -524,10 +524,11 @@ class Posts extends Controller
         {
             $user = Auth::user();
             $estate = Estate::find($estate_id);
-            $estateimage = $estate->images()->get() ;
-            $estateowner = $estate->owner()->get() ;
             if ($estate) {
                 $favorite = $user->isEstateFavorite($estate);
+                $estateimage = $estate->images()->get() ;
+                $estateowner = $estate->owner()->get() ;
+
                 return response()->json([
                     'Status' => true,
                     'Estate' => $estate,

@@ -170,7 +170,7 @@ class Profile extends Controller
     {
         try
         {
-            if ($id == Auth::id() or \auth()->user()->role = 'admin')
+            if ($id == Auth::id() or \auth()->user()->role == 'admin')
             {
                 $user = User::find($id) ;
 
@@ -178,8 +178,8 @@ class Profile extends Controller
                 {
 
                     $user->delete();
-
-                    $this->LogOut() ;
+                    $reg = new Register() ;
+                    $reg->LogOut() ;
 
                     return response()->json([
                         'Status' => true,
@@ -193,6 +193,12 @@ class Profile extends Controller
                     ]);
                 }
 
+            }else
+            {
+                return response()->json([
+                    'Status' => false ,
+                    'Message' => 'Access denied'
+                ]);
             }
 
         }

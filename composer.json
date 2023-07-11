@@ -11,7 +11,9 @@
         "laravel/sanctum": "^3.2",
         "laravel/socialite": "^5.6",
         "laravel/tinker": "^2.8",
-        "pusher/pusher-php-server": "^7.2"
+        "pusher/pusher-php-server": "^7.2",
+        "twilio/sdk": "^7.5",
+        "vonage/client": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

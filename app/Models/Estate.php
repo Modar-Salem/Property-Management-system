@@ -56,7 +56,7 @@ class Estate extends Model
     public function generateFakeData()
     {
         $faker = Faker::create();
-        $this->owner_id = $faker->numberBetween(1, 10);
+        $this->owner_id = $faker->numberBetween(1, 100);
         $this->estate_type = $faker->randomElement(['land', 'apartment' , 'villa' , 'commercial shops' , 'warehouses' ,'commercial real estate' ]);
         $this->operation_type = $faker->randomElement(['sell','rent']);
         $this->governorate = $faker->randomElement(['Aleppo','Al-Ḥasakah','Al-Qamishli','Al-Qunayṭirah','Al-Raqqah','Al-Suwayda','Damascus','Darʿa','Dayr al-Zawr','Ḥamah','Homs','Idlib','Latakia' , 'Rif Dimashq']);

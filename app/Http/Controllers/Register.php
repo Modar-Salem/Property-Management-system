@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\verify_email;
+use http\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Hash;
 
 class Register extends Controller
 {
+
+
 
 
     private function validateImageRequest(Request $request)
@@ -88,7 +91,7 @@ class Register extends Controller
             $token = $User->createToken('API TOKEN')->plainTextToken;
 
             //send code to verify
-            $this->send_code_verify($request);
+            $this->sendEmailVerificationCode($request);
 
             //store the image
             if ($request->hasFile('image')) {
@@ -136,7 +139,7 @@ class Register extends Controller
 
     }
 
-    public function send_code_verify(Request $request)
+    public function sendEmailVerificationCode(Request $request)
     {
         try{
             //validate request
@@ -177,47 +180,85 @@ class Register extends Controller
 
     public function check_code_email_verify(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required | exists:users,email' ,
-            'code' =>'required|string|exists:verify,code'
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'Status'=>false,
-                'ErrorMessage'=>$validator->errors()]);
-        }
+        try{
+            $validator = Validator::make($request->all(), [
+                'email' => 'required | exists:users,email',
+                'code' => 'required|string|exists:verify,code'
+            ]);
 
-        //find the code
-        $Code= verify_email::where('code',$request['code'])->first();
+            if ($validator->fails()) {
+                return response()->json([
+                    'Status' => false,
+                    'ErrorMessage' => $validator->errors()]);
+            }
 
-        //check if it is not expired:the time is one hour
-        if($Code['created_at'] > now()->addHour() )
-        {
+            //find the code
+            $Code = verify_email::where('code', $request['code'])->first();
+
+            //check if it is not expired:the time is one hour
+            if ($Code['created_at'] > now()->addHour()) {
+                $Code->delete();
+                return response()->json(['Message' => trans('code is expire')], 422);
+            }
+
+            //find users email
+            $user = User::where('email', $Code['email'])->first();
+
+            if ($user->email != $request['email']) {
+                return response()->json([
+                    'Message' => 'code incorrect '
+                ]);
+            }
+            //update user password
+            $user = User::where('email', $Code['email']);
+            $user->update(['email_verified_at' => now()]);
             $Code->delete();
-            return response()->json(['Message'=>trans('code is expire')],422);
-        }
 
-        //find users email
-        $user = User::where('email',$Code['email'])->first();
-
-        if($user->email != $request['email'])
+            return response()->json([
+                'Status' => true,
+                'Message' => 'email is verified'
+            ]);
+        }catch(\Exception $exception)
         {
             return response()->json([
-                'Message' => 'code incorrect '
-            ]) ;
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]);
         }
-        //update user password
-        $user = User::where('email',$Code['email']);
-        $user->update(['email_verified_at' => now()]);
-        $Code->delete() ;
-
-        return response()->json([
-            'Status' => true ,
-            'Message' => 'email is verified'
-        ]) ;
     }
 
+    public function sendSmsVerificationCode(Request $request)
+    {
+        try{
+            $apiKey = config('services.vonage.api_key');
+            $apiSecret = config('services.vonage.api_secret');
+            $from = config('services.vonage.sms_from');
+
+            // Generate the verification code
+            $code = mt_rand(100000, 999999);
+            $phoneNumber = $request->input('phone');
+
+            $client = new Client(new \Vonage\Client\Credentials\Basic($apiKey, $apiSecret));
+
+            $client->sms()->send([
+                'to' => $phoneNumber,
+                'from' => $from,
+                'text' => 'Your verification code: ' . $code,
+            ]);
+
+            return response()->json([
+                'Status' => true ,
+                'Message' => 'code.sent'
+            ]) ;
+        }catch(\Exception $exception)
+        {
+            return response()->json([
+                'Status' => false ,
+                'Message' => $exception->getMessage()
+            ]);
+        }
+    }
 
 
 
@@ -300,81 +341,5 @@ class Register extends Controller
         }
 
     }
-
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(Request $request)
-    {
-        try {
-
-            $user = User::find(Auth::id());
-
-            $user->update($request->all());
-            return response()->json([
-                'Status' => true,
-                'Message' => 'User has been Updated Successfully' ,
-                'User' => User::find(Auth::id())
-            ]);
-
-        }catch (\Exception $exception)
-        {
-            return response()->json([
-                'Status' => false,
-                'Message' => $exception->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function destroy($id)
-    {
-        try
-        {
-            if ($id == Auth::id() or \auth()->user()->role = 'admin')
-            {
-                $user = User::find($id) ;
-
-                if ($user)
-                {
-
-                    $user->delete();
-
-                    $this->LogOut() ;
-
-                    return response()->json([
-                        'Status' => true,
-                        'Message' => 'User has been deleted successfully'
-                    ]);
-                }else
-                {
-                    return response()->json([
-                        'Status' => false ,
-                        'Message' => 'User Not Found'
-                    ]);
-                }
-
-            }
-
-        }
-        catch (\Exception $exception)
-        {
-            return  response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
-            ]) ;
-        }
-    }
-
 
 }
