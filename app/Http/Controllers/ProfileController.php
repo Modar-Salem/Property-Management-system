@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
-class Profile extends Controller
+class ProfileController extends Controller
 {
 
 
@@ -67,31 +67,14 @@ class Profile extends Controller
             'image' => 'mimes:jpeg,jpg,png',
         ]);
     }
-    private function store_image(Request $request)
-    {
 
-        $image = $request->file('image');
 
-        //Get FileName with extension
-        $filenameWithExt = $image->getClientOriginalName();
-
-        //Get FileName without Extension
-        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-        //Get Extension
-        $Extension = $image->getClientOriginalExtension();
-
-        //New_File_Name
-        $NewfileName = $filename . '_' . time() . '_.' . $Extension;
-
-        //Upload Image
-        return $path = $image->storeAs('images', $NewfileName, 'public');
-    }
-    public function insert_image(Request $request)
+    public function User_insert_image(Request $request)
     {
         $user_id = Auth::id() ;
 
         $validateImage = $this->validateImageRequest($request);
+
         if ($validateImage->fails())
             return response()->json([
                 'Status' => false,
@@ -103,14 +86,14 @@ class Profile extends Controller
             try
             {
                 $user= \App\Models\User::find($user_id)  ;
+                $Image = new ImageController() ;
 
                 if ($user['image']!=null)
                 {
-                    $imagePath = str_replace('/storage', '', parse_url($user->image, PHP_URL_PATH));
-                    $isdeleted = Storage::delete($imagePath) ;
+                    $Image->delete_image_from_Storage($user['image']) ;
                 }
 
-                $path = $this->store_image($request) ;
+                $path = $Image->store_image_User($request) ;
 
                 //create Object in Database
                 $user->update(['image' => URL::asset('storage/' . $path)]);
@@ -160,6 +143,7 @@ class Profile extends Controller
         }
     }
 
+
     /**
      * Remove the specified resource from storage.
      *
@@ -178,7 +162,7 @@ class Profile extends Controller
                 {
 
                     $user->delete();
-                    $reg = new Register() ;
+                    $reg = new RegisterController() ;
                     $reg->LogOut() ;
 
                     return response()->json([
@@ -211,11 +195,12 @@ class Profile extends Controller
         }
     }
 
+
     private function ValidateResetPasswordRequest(Request $request)
     {
         return Validator::make($request->all(), [
             'old_password' => 'required | string | min : 8 | max:34 ' ,
-            'password' => 'required | string | min : 8 | max:34 '
+            'new_password' => 'required | string | min : 8 | max:34 '
         ]);
     }
     public function resetPassword(Request $request)

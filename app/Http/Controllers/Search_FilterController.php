@@ -11,45 +11,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class Search_Filter extends Controller
+class Search_FilterController extends Controller
 {
-    private function GetCarsWithImages($posts)
-    {
-        $user = Auth::user();
-
-        $postsWithImages = [];
-
-        foreach ($posts as $car) {
-            $images = $car->images()->get();
-            $favorite = $user->isCarFavorite($car);
-            $postWithImage = [
-                'post' => $car,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
-        return $postsWithImages;
-
-    }
-
-    private function GetEstateWithImages($posts)
-    {
-        $user = Auth::user();
-        $postsWithImages = [];
-
-        foreach ($posts as $estate) {
-            $images = $estate->images()->get();
-            $favorite = $user->isEstateFavorite($estate);
-            $postWithImage = [
-                'post' => $estate,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
-        return $postsWithImages;
-    }
 
     public function Filter(Request $request)
     {
@@ -102,10 +65,10 @@ class Search_Filter extends Controller
                     $post = $post->where('status', $request['status']);
 
                 if ($post) {
-
+                    $PostControl = new PostsController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $this->GetEstateWithImages($post)
+                        'Posts' => $PostControl->GetEstateWithImages($post)
                     ], 201);
 
                 }
@@ -161,10 +124,10 @@ class Search_Filter extends Controller
                     $post = $post->where('kilometers', '<', $request['max_kilometers']);
 
                 if ($post) {
-
+                    $PostControl = new PostsController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $this->GetCarsWithImages($post)
+                        'Posts' => $PostControl->GetCarsWithImages($post)
                     ], 201);
 
                 }
@@ -199,20 +162,24 @@ class Search_Filter extends Controller
             if ($request['type'] == 'car' )
             {
                 $posts = Car::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
-                if ($posts) {
+                if ($posts)
+                {
+                    $PostControl = new PostsController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $this->GetCarsWithImages($posts)
+                        'Posts' => $PostControl->GetCarsWithImages($posts)
                     ], 201);
                 }
             }
             if ($request['type'] == 'estate' )
             {
                 $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
-                if ($posts) {
+                if ($posts)
+                {
+                    $PostControl = new PostsController() ;
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $this->GetEstateWithImages($posts)
+                        'Posts'=> $PostControl->GetEstateWithImages($posts)
                     ],201) ;
                 }
             }

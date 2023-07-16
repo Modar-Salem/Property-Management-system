@@ -13,18 +13,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
-class Register extends Controller
+class RegisterController extends Controller
 {
-
-
-
-
-    private function validateImageRequest(Request $request)
-    {
-        return Validator::make($request->all(), [
-            'image' => 'mimes:jpeg,jpg,png',
-        ]);
-    }
 
 
     private function validateSignUpRequest(Request $request)
@@ -33,30 +23,8 @@ class Register extends Controller
             'name' => 'required|string|min:5|max:34',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|max:34',
-            'phone_number' => 'required|string|min:8|max:14',
-            'image' => 'mimes:jpeg,jpg,png',
+            'phone_number' => 'required|string|min:8|max:14'
         ]);
-    }
-
-    private function store_image(Request $request)
-    {
-
-        $image = $request->file('image');
-
-        //Get FileName with extension
-        $filenameWithExt = $image->getClientOriginalName();
-
-        //Get FileName without Extension
-        $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-        //Get Extension
-        $Extension = $image->getClientOriginalExtension();
-
-        //New_File_Name
-        $NewfileName = $filename . '_' . time() . '_.' . $Extension;
-
-        //Upload Image
-         return $path = $image->storeAs('images', $NewfileName, 'public');
     }
     /**
      * Store a newly created resource in storage.
@@ -84,20 +52,29 @@ class Register extends Controller
 
                 'password' => \Illuminate\Support\Facades\Hash::make($request['password']),
 
-                'phone_number' => $request['phone_number']
+                'phone_number' => $request['phone_number'],
+
+                'facebook_URL' => $request['facebook_URL'],
+
+                'instagram_URL' => $request['instagram_URL'],
+
+                'twitter_URL' => $request['twitter_URL']
+
             ]);
 
             //create token
             $token = $User->createToken('API TOKEN')->plainTextToken;
 
             //send code to verify
-            $this->sendEmailVerificationCode($request);
+            $verify = new VerifyController() ;
+            $verify->sendEmailVerificationCode($request);
 
             //store the image
             if ($request->hasFile('image')) {
+                $image = new ImageController() ;
 
                 //validate image
-                $validateImage = $this->validateImageRequest($request);
+                $validateImage = $image->validateImageRequest($request);
                 if ($validateImage->fails())
                     return response()->json([
                         'Status' => false,
@@ -105,7 +82,7 @@ class Register extends Controller
                     ]);
 
                 //store image in storage
-                $path = $this->store_image($request) ;
+                $path = $image->store_image_User($request) ;
 
                 //store image in database
                 \App\Models\User::find($User['id'])
@@ -139,127 +116,6 @@ class Register extends Controller
 
     }
 
-    public function sendEmailVerificationCode(Request $request)
-    {
-        try{
-            //validate request
-            $validate = Validator::make($request->all(), [
-                'email' => 'required | email',
-            ]);
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
-
-            //generate code
-            $code = mt_rand(100000, 999999);
-
-            //Send email to user
-            Mail::to($request['email'])->send(new \App\Mail\verifyemail($code));
-            verify_email::create([
-                'email' => $request['email'],
-                'code' => $code
-            ]);
-
-            return response()->json([
-                'Status' => true,
-                'Message' => 'code is sent successfully'
-            ]);
-        }
-        catch (\Exception $exception)
-        {
-            return response() -> json([
-                'Status' => false  ,
-                'Message' => $exception->getMessage() ,
-            ] ) ;
-        }
-
-    }
-
-
-    public function check_code_email_verify(Request $request)
-    {
-
-        try{
-            $validator = Validator::make($request->all(), [
-                'email' => 'required |email |exists:users,email',
-                'code' => 'required|string|exists:verify,code'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'Status' => false,
-                    'ErrorMessage' => $validator->errors()]);
-            }
-
-            //find the code
-            $Code = verify_email::where('code', $request['code'])->first();
-
-            //check if it is not expired:the time is one hour
-            if ($Code['created_at'] > now()->addHour()) {
-                $Code->delete();
-                return response()->json(['Message' => trans('code is expire')], 422);
-            }
-
-            //find users email
-            $user = User::where('email', $Code['email'])->first();
-
-            if ($user->email != $request['email']) {
-                return response()->json([
-                    'Message' => 'code incorrect '
-                ]);
-            }
-            //update user password
-            $user = User::where('email', $Code['email']);
-            $user->update(['email_verified_at' => now()]);
-            $Code->delete();
-
-            return response()->json([
-                'Status' => true,
-                'Message' => 'email is verified'
-            ]);
-        }catch(\Exception $exception)
-        {
-            return response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
-            ]);
-        }
-    }
-
-    public function sendSmsVerificationCode(Request $request)
-    {
-        try{
-            $apiKey = config('services.vonage.api_key');
-            $apiSecret = config('services.vonage.api_secret');
-            $from = config('services.vonage.sms_from');
-
-            // Generate the verification code
-            $code = mt_rand(100000, 999999);
-            $phoneNumber = $request->input('phone');
-
-            $client = new Client(new \Vonage\Client\Credentials\Basic($apiKey, $apiSecret));
-
-            $client->sms()->send([
-                'to' => $phoneNumber,
-                'from' => $from,
-                'text' => 'Your verification code: ' . $code,
-            ]);
-
-            return response()->json([
-                'Status' => true ,
-                'Message' => 'code.sent'
-            ]) ;
-        }catch(\Exception $exception)
-        {
-            return response()->json([
-                'Status' => false ,
-                'Message' => $exception->getMessage()
-            ]);
-        }
-    }
-
 
 
     private function validateLogInRequest(Request $request)
@@ -275,11 +131,10 @@ class Register extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function LogIn(Request $request) {
-
+    public function LogIn(Request $request)
+    {
         try
         {
-
             $validate = $this->validateLogInRequest($request) ;
             if ($validate->fails())
                 return response()->json([

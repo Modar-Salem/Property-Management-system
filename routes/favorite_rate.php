@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 //Rate
-Route::post('Give_Rate' , [\App\Http\Controllers\Posts::class , 'rate']) ;
+Route::post('Give_Rate' , [\App\Http\Controllers\RateController::class , 'rate']) ;
 
-Route::post('Get_Rate', [\App\Http\Controllers\Posts::class ,'Get_Rate' ])  ;
+Route::post('Get_Rate', [\App\Http\Controllers\RateController::class ,'Get_Rate' ])  ;
 
 
 //Favorite
-Route::post('Add_To_Favorite' , [\App\Http\Controllers\Posts::class , 'Add_To_Favorite']) ;
+Route::post('Add_To_Favorite' , [\App\Http\Controllers\FavoriteController::class , 'Add_To_Favorite']) ;
 
-Route::post('Get_All_Favorite' , [\App\Http\Controllers\Posts::class , 'Get_All_Favorite']) ;
+Route::post('Get_All_Favorite' , [\App\Http\Controllers\FavoriteController::class , 'Get_All_Favorite']) ;
 
-route::post('Likes_number', [\App\Http\Controllers\Posts::class , 'Likes_number']) ;
+route::post('Likes_number', [\App\Http\Controllers\FavoriteController::class , 'Likes_number']) ;

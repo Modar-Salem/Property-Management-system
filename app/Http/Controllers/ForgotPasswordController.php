@@ -39,38 +39,11 @@ class ForgotPasswordController extends Controller
             'Message'=>trans('code.sent')
         ]);
     }
-    public function userCheckCode(Request $request){
-
-        $validator = Validator::make($request->all(), [
-            'code' =>'required|string|exists:reset_code_passwords,code',
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'Status'=>false,
-                'ErrorMessage'=>$validator->errors()]);
-        }
-
-        $validator->validated();
-        //find the code
-        $PasswordReset=ResetCodePassword::query()->firstWhere('code',$request['code']);
-        //check if it is not expired:the time is one hour
-        if($PasswordReset['created_at'] > now()->addHour())
-        {
-            $PasswordReset->delete();
-            return response()->json(['message'=>trans('password.code_is_expire')],422);
-
-        }
-        return response()->json([
-            'Status'=>true,
-            'code' => $PasswordReset['code'],
-            'Message' => trans('password.code_is_valid')
-        ]);
-    }
     public function userResetPassword(Request $request){
 
         $validator = Validator::make($request->all(), [
             'code' => 'required|string|exists:reset_code_passwords,code',
-            'password' => ['required','confirmed']
+            'password' => ['required']
         ]);
 
         if ($validator->fails()) {
@@ -90,6 +63,8 @@ class ForgotPasswordController extends Controller
         }
         //find users email
         $user = User::query()->firstWhere('email',$PasswordReset['email']);
+
+
         //update user password
         $input['password'] = bcrypt($input['password']);
         $user->update(['password' => $input['password']]);

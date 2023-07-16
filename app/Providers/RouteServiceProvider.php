@@ -37,18 +37,18 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('Register')
                 ->namespace($this->namespace)
-                ->group(base_path('routes/Register.php')) ;
+                ->group(base_path('routes/register.php')) ;
 
             Route::middleware(['api','auth:sanctum' , 'verify'])
                 ->prefix('PMS')
                 ->namespace($this->namespace)
-                ->group(base_path('routes/Posts.php')) ;
+                ->group(base_path('routes/posts.php')) ;
 
 
             Route::middleware(['api' , 'auth:sanctum', 'verify'])
                 ->prefix('PMS')
                 ->namespace($this->namespace)
-                ->group(base_path('routes/Profile.php')) ;
+                ->group(base_path('routes/profile.php')) ;
 
             Route::middleware(['api' , 'auth:sanctum', 'verify'])
                 ->prefix('PMS')
@@ -59,6 +59,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('PMS')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/favorite_rate.php')) ;
+
+            Route::middleware(['api' , 'auth:sanctum', 'verify'])
+                ->prefix('PMS')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/search_filter.php')) ;
 
         });
     }
