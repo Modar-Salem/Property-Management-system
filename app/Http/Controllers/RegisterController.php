@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\verify_email;
-use http\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -50,7 +46,7 @@ class RegisterController extends Controller
 
                 'email' => $request['email'],
 
-                'password' => \Illuminate\Support\Facades\Hash::make($request['password']),
+                'password' => Hash::make($request['password']),
 
                 'phone_number' => $request['phone_number'],
 
@@ -59,7 +55,6 @@ class RegisterController extends Controller
                 'instagram_URL' => $request['instagram_URL'],
 
                 'twitter_URL' => $request['twitter_URL']
-
             ]);
 
             //create token
@@ -186,7 +181,6 @@ class RegisterController extends Controller
     {
         try
         {
-
             Auth::user()->tokens()->delete();
 
             return  response()->json([

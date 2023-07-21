@@ -12,6 +12,13 @@ use TheSeer\Tokenizer\Exception;
 
 class ChatController extends Controller
 {
+    public function ValidatesendMessage(Request $request)
+    {
+        return Validator::make($request->all() , [
+            'receiver_id' => 'required|exists:users,id',
+            'message' => 'required|string | max : 600',
+        ]);
+    }
     /**
      * Send a new chat message.
      *
@@ -20,12 +27,8 @@ class ChatController extends Controller
      */
     public function sendMessage(Request $request)
     {
-
         try{
-            $validatedData = Validator::make($request->all() , [
-                'receiver_id' => 'required|exists:users,id',
-                'message' => 'required|string | max : 600',
-            ]);
+            $validatedData = $this->ValidatesendMessage($request) ;
             if($validatedData->fails())
             {
                 return response()->json([
@@ -55,6 +58,12 @@ class ChatController extends Controller
 
     }
 
+    public function ValidategetConversation($request)
+    {
+        return Validator::make($request->all() ,[
+            'receiver_id' => 'required|exists:users,id'
+        ]) ;
+    }
     /**
      * Retrieve chat messages between two users.
      *
@@ -63,16 +72,20 @@ class ChatController extends Controller
      */
     public function getConversation(Request $request)
     {
-        $validatedData = $request->validate([
-            'receiver_id' => 'required|exists:users,id',
-        ]);
+        $validatedData = $this->ValidategetConversation($request) ;
+        if($validatedData->fails())
+        {
+            return response()->json([
+                'Error' => $validatedData->errors()
+            ]);
+        }
         $sender_id = Auth::id();
 
-        $chats = Chat::where(function ($query) use ($validatedData, $sender_id) {
+        $chats = Chat::where(function ($query) use ($request, $sender_id) {
             $query->where('sender_id', $sender_id)
-                ->where('receiver_id', $validatedData['receiver_id']);
-        })->orWhere(function ($query) use ($validatedData, $sender_id) {
-            $query->where('sender_id', $validatedData['receiver_id'])
+                ->where('receiver_id', $request['receiver_id']);
+        })->orWhere(function ($query) use ($request, $sender_id) {
+            $query->where('sender_id', $request['receiver_id'])
                 ->where('receiver_id', $sender_id);
         })->get();
 
