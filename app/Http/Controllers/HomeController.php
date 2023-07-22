@@ -32,7 +32,7 @@ class HomeController extends Controller
                 ->join('estates', 'favorites.estate_id', '=', 'estates.id')
                 ->where('favorites.user_id', '=', $user_id)
                 ->select('estates.governorate')
-                ->get();
+                ->get()->unique() ;
 
 
             $existingPostIds = []; // Track existing post IDs
@@ -123,7 +123,7 @@ class HomeController extends Controller
                     ->join('cars', 'favorites.car_id', '=', 'cars.id')
                     ->where('favorites.user_id', '=', $user_id)
                     ->select('cars.governorate')
-                    ->get();
+                    ->get()->unique();
 
                 $postsWithImages = collect();
                 $existingPostIds = [];
