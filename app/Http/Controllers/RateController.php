@@ -42,7 +42,8 @@ class RateController extends Controller
 
                 if($estate)
                     Rate::updateOrCreate([
-                        'user_id' => $user_id
+                        'user_id' => $user_id ,
+                        'estate_id' => $estate->id
                     ],
                         [
                             'rate' => $request['rate'],
@@ -58,7 +59,8 @@ class RateController extends Controller
                 $car = Car::find($request['car_id']) ;
                 if($car)
                     Rate::updateOrCreate([
-                        'user_id' => $user_id
+                        'user_id' => $user_id ,
+                        'car_id' => $car->id
                     ],
                         [
                             'rate' => $request['rate'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LikeEvent;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\Favorite;
@@ -129,6 +130,8 @@ class FavoriteController extends Controller
                     'Message' => $validate->errors()
                 ]) ;
             }
+            $car = null ;
+            $estate= null ;
 
             $user_id = Auth::id() ;
             $favorite = null ;
@@ -165,19 +168,24 @@ class FavoriteController extends Controller
                 $user_id = Auth::id();
 
                 if($request['type'] == 'estate')
+                {
                     \App\Models\Favorite::create([
                         'estate_id' => $request['id'],
-                        'user_id' => $user_id ,
+                        'user_id' => $user_id,
                         'property_type' => 'estate'
                     ]);
 
+                    broadcast(new LikeEvent('estate' , $estate->owner_id ,$estate->id)) ;
+                }
                 if($request['type'] == 'car')
+                {
                     \App\Models\Favorite::create([
                         'car_id' => $request['id'],
-                        'user_id' => $user_id ,
+                        'user_id' => $user_id,
                         'property_type' => 'car'
                     ]);
-
+                    broadcast(new LikeEvent('car' , $car->owner_id ,$car->id)) ;
+                }
                 return response()->json([
                     'Status' => true,
                     'Message' => 'product favorite'
