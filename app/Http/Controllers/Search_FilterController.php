@@ -26,12 +26,11 @@ class Search_FilterController extends Controller
                     'Validation Error' => $validate->errors()
                 ]);
 
-            $user = Auth::user();
             if ($request['type'] == 'estate') {
 
-                $post = \App\Models\Estate::all();
+                $post = Estate::all() ;
                 if ($request['estate_type'] != null)
-                    $post = \App\Models\Estate::where('estate_type', $request['estate_type']);
+                    $post = $post->where('estate_type', $request['estate_type']);
 
                 if ($request['operation_type'] != null)
                     $post = $post->where('operation_type', $request['operation_type']);
@@ -65,7 +64,7 @@ class Search_FilterController extends Controller
                     $post = $post->where('status', $request['status']);
 
                 if ($post) {
-                    $PostControl = new PostsController() ;
+                    $PostControl = new EstateController() ;
                     return response()->json([
                         'Status' => true,
                         'Posts' => $PostControl->GetEstateWithImages($post)
@@ -124,7 +123,7 @@ class Search_FilterController extends Controller
                     $post = $post->where('kilometers', '<', $request['max_kilometers']);
 
                 if ($post) {
-                    $PostControl = new PostsController() ;
+                    $PostControl = new CarController() ;
                     return response()->json([
                         'Status' => true,
                         'Posts' => $PostControl->GetCarsWithImages($post)
@@ -164,7 +163,7 @@ class Search_FilterController extends Controller
                 $posts = Car::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts)
                 {
-                    $PostControl = new PostsController() ;
+                    $PostControl = new CarController() ;
                     return response()->json([
                         'Status' => true,
                         'Posts' => $PostControl->GetCarsWithImages($posts)
@@ -176,7 +175,7 @@ class Search_FilterController extends Controller
                 $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts)
                 {
-                    $PostControl = new PostsController() ;
+                    $PostControl = new EstateController() ;
                     return response()->json([
                         'Status'=>true ,
                         'Posts'=> $PostControl->GetEstateWithImages($posts)

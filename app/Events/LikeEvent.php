@@ -13,9 +13,9 @@ use Illuminate\Queue\SerializesModels;
 class LikeEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    private $type ;
-    private $receiver_id ;
-    private $post_id ;
+    public $type ;
+    public $receiver_id ;
+    public $post_id ;
     /**
      * Create a new event instance.
      */

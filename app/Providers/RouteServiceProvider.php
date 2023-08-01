@@ -42,7 +42,12 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware(['api','auth:sanctum' , 'verify'])
                 ->prefix('PMS')
                 ->namespace($this->namespace)
-                ->group(base_path('routes/posts.php')) ;
+                ->group(base_path('routes/car.php')) ;
+
+            Route::middleware(['api','auth:sanctum' , 'verify'])
+                ->prefix('PMS')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/estate.php')) ;
 
 
             Route::middleware(['api' , 'auth:sanctum', 'verify'])

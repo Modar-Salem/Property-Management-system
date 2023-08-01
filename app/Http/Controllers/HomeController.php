@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
 class HomeController extends Controller
 {
     /**
@@ -106,7 +105,7 @@ class HomeController extends Controller
                 'AllPost' => $relatedPosts
             ]);
 
-        }catch (\Throwable $exception) {
+        }catch (\Exception $exception) {
             return response()->json([
                 'Status' => false,
                 'Error Message' => $exception->getMessage(),
@@ -192,7 +191,7 @@ class HomeController extends Controller
                     'All_Post' => $postsWithImages
                 ]);
 
-            } catch (\Throwable $exception) {
+            } catch (\Exception $exception) {
                 return response()->json([
                     'Status' => false,
                     'Error Message' => $exception->getMessage(),
