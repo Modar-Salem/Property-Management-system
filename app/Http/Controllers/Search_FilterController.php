@@ -53,7 +53,6 @@ class Search_FilterController extends Controller
                 if ($request['min_space'] != null)
                     $post = $post->where('space', '>', $request['max_space']);
 
-
                 if ($request['max_level'] != null)
                     $post = $post->where('level', '<', $request['max_level']);
 
