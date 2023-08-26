@@ -28,7 +28,7 @@ class Search_FilterController extends Controller
 
             if ($request['type'] == 'estate') {
 
-                $post = Estate::all() ;
+                $post = Estate::query() ;
                 if ($request['estate_type'] != null)
                     $post = $post->where('estate_type', $request['estate_type']);
 
@@ -66,7 +66,7 @@ class Search_FilterController extends Controller
                     $PostControl = new EstateController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetEstateWithImages($post)
+                        'Posts' => $PostControl->GetEstateWithImages($post->get())
                     ], 201);
 
                 }
@@ -74,7 +74,7 @@ class Search_FilterController extends Controller
 
 
             if ($request['type'] == 'car') {
-                $post = \App\Models\Car::all();
+                $post = \App\Models\Car::query();
 
                 if ($request['operation_type'] != null)
                     $post = $post->where('operation_type', $request['operation_type']);
@@ -125,7 +125,7 @@ class Search_FilterController extends Controller
                     $PostControl = new CarController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetCarsWithImages($post)
+                        'Posts' => $PostControl->GetCarsWithImages($post->get())
                     ], 201);
 
                 }

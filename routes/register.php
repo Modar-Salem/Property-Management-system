@@ -30,4 +30,9 @@ Route::post('send_code' , [\App\Http\Controllers\VerifyController::class , 'send
 //Forgot Password
 Route::post('/user/password/email', [\App\Http\Controllers\ForgotPasswordController::class, 'userForgotPassword']);
 
+Route::post('user/password/code/check', [\App\Http\Controllers\ForgotPasswordController::class, 'userCheckCode']);
+
 Route::post('/user/password/reset', [\App\Http\Controllers\ForgotPasswordController::class, 'userResetPassword']);
+
+//External API
+Route::get('GetIP/{ipAddress}', [\App\Http\Controllers\RegisterController::class , 'getIPInfo']) ;

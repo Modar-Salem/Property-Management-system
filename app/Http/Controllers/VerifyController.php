@@ -8,6 +8,7 @@ use http\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use function Ramsey\Collection\remove;
 
 class VerifyController extends Controller
 {
@@ -15,31 +16,38 @@ class VerifyController extends Controller
     //Send The verification code
     public function sendEmailVerificationCode(Request $request)
     {
-        try{
-            //validate request
-            $validate = Validator::make($request->all(), [
-                'email' => 'required | email',
-            ]);
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
-
-            //generate code
-            $code = mt_rand(100000, 999999);
-
-            //Send email to user
-            Mail::to($request['email'])->send(new \App\Mail\verifyemail($code));
-            verify_email::create([
-                'email' => $request['email'],
-                'code' => $code
-            ]);
-
+        //validate request
+        $validate = Validator::make($request->all(), [
+            'email' => 'required | email  |exists:users,email',
+        ]);
+        if ($validate->fails())
             return response()->json([
-                'Status' => true,
-                'Message' => 'code is sent successfully'
+                'Status' => false,
+                'Validation Error' => $validate->errors()
             ]);
+        verify_email::where('email' , $request['email'])->delete() ;
+        //generate code
+        $code = mt_rand(100000, 999999);
+
+        //Send email to user
+        Mail::to($request['email'])->send(new \App\Mail\verifyemail($code));
+        verify_email::create([
+            'email' => $request['email'],
+            'code' => $code
+        ]);
+
+        return response()->json([
+            'Status' => true,
+            'Message' => 'code is sent successfully'
+        ]);
+    }
+
+    //Send The verification code
+    public function sendEmailVerificationCodePublic(Request $request)
+    {
+        try
+        {
+            $this->sendEmailVerificationCode($request) ;
         }
         catch (\Exception $exception)
         {
@@ -48,7 +56,6 @@ class VerifyController extends Controller
                 'Message' => $exception->getMessage() ,
             ] ) ;
         }
-
     }
 
     //check if the sent code is true
@@ -61,7 +68,7 @@ class VerifyController extends Controller
                 'code' => 'required|string|exists:verify,code'
             ]);
 
-            if ($validator->fails()) {
+            if ($validator->fails()){
                 return response()->json([
                     'Status' => false,
                     'ErrorMessage' => $validator->errors()]);
@@ -89,8 +96,22 @@ class VerifyController extends Controller
             $user->update(['email_verified_at' => now()]);
             $Code->delete();
 
+
+            // Create token
+
+            $user = User::where('email', $Code['email'])->first();
+
+            $token_init = $user->createToken('API TOKEN');
+
+            // Set expiration date
+            $token_init->expires_at = now()->addDays(7);
+
+            $token = $token_init->plainTextToken ;
+
             return response()->json([
                 'Status' => true,
+                'User' => $user ,
+                'token' => $token,
                 'Message' => 'email is verified'
             ]);
         }catch(\Exception $exception)

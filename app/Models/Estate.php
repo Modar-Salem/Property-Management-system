@@ -59,7 +59,7 @@ class Estate extends Model
         $this->owner_id = $faker->numberBetween(1, 100);
         $this->estate_type = $faker->randomElement(['land', 'apartment' , 'villa' , 'commercial shops' , 'warehouses' ,'commercial real estate' ]);
         $this->operation_type = $faker->randomElement(['sell','rent']);
-        $this->governorate = $faker->randomElement(['Aleppo','Al-Ḥasakah','Al-Qamishli','Al-Qunayṭirah','Al-Raqqah','Al-Suwayda','Damascus','Darʿa','Dayr al-Zawr','Ḥamah','Homs','Idlib','Latakia' , 'Rif Dimashq']);
+        $this->governorate = $faker->randomElement(['Aleppo','Al-Ḥasakah','Al-Qamishli','Al-Qunayṭirah','Al-Raqqah','Al-Suwayda','Damascus','Daraa','Dayr al-Zawr','Ḥamah','Homs','Idlib','Latakia' , 'Rif Dimashq']);
         $this->locationInDamascus = $faker->randomElement(['Ancient City (Old City)', 'Barzeh', 'Dummar', 'Jobar', 'Qanawat', 'Kafr Souseh', 'Mezzeh',
             'Al-Midan', 'Muhajreen', 'Qaboun', 'Qadam', 'Rukn ad-Din', 'Al-Salihiyah', 'Sarouja', 'Al-Shaghour', 'Yarmouk' , 'Jaramana']);
 

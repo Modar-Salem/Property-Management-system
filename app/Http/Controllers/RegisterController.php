@@ -2,26 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailVerify;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
 {
-
-
     private function validateSignUpRequest(Request $request)
     {
         return Validator::make($request->all(), [
-            'name' => 'required|string|min:5|max:34',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|max:34',
-            'phone_number' => 'required|string|min:8|max:14'
         ]);
     }
+
+    public function getIPInfo($ipAddress)
+    {
+        $apiKey = 'lH2nuxQOrwSAj+O+ulDjJg==bDSrfkObt70jmymU';
+        $apiUrl = "https://api.api-ninjas.com/v1/iplookup?address={$ipAddress}";
+
+        $response = Http::withHeaders([
+            'X-Api-Key' => $apiKey,
+        ])->get($apiUrl);
+
+        if ($response->successful()) {
+            $ipInfo = $response->json();
+            return response()->json($ipInfo);
+        } else {
+            $error = [
+                'error' => true,
+                'message' => "Error: {$response->status()} {$response->body()}",
+            ];
+            return response()->json($error, $response->status());
+        }
+    }
+
+
+
     /**
      * Store a newly created resource in storage.
      *
@@ -35,11 +57,24 @@ class RegisterController extends Controller
             //Validate $request
             $validate = $this->validateSignUpRequest($request);
             if ($validate->fails())
+            {
+                $error = $validate->errors() ;
+                if($error->has('email') && $error->get('email')[0] === "The email has already been taken.")
+                {
+                    $user_temp = User::where('email' , $request['email'])->first() ;
+                    if($user_temp->email_verified_at == null)
+                    {
+                        return response()->json([
+                            'Status' => false,
+                            'Validation Error' => 'email must be verified'
+                        ]);
+                    }
+                }
                 return response()->json([
                     'Status' => false,
                     'Validation Error' => $validate->errors()
                 ]);
-
+            }
             //store the user
             $User = \App\Models\User::create([
                 'name' => $request['name'],
@@ -57,12 +92,7 @@ class RegisterController extends Controller
                 'twitter_URL' => $request['twitter_URL']
             ]);
 
-            //create token
-            $token = $User->createToken('API TOKEN')->plainTextToken;
-
-            //send code to verify
-            $verify = new VerifyController() ;
-            $verify->sendEmailVerificationCode($request);
+            SendEmailVerify::dispatch($request['email']) ;
 
             //store the image
             if ($request->hasFile('image')) {
@@ -89,7 +119,6 @@ class RegisterController extends Controller
                 return response()->json([
                         'Status' => true,
                         'User' => $User,
-                        "Token" => $token,
                         'Message' => 'Image are inserted Successfully',
                 ]);
 
@@ -98,7 +127,6 @@ class RegisterController extends Controller
             return response()->json([
                 'Status' => true,
                 'User' => $User,
-                "Token" => $token
             ]);
 
         }catch(\Exception $exception)
@@ -113,6 +141,7 @@ class RegisterController extends Controller
 
 
 
+
     private function validateLogInRequest(Request $request)
     {
         return Validator::make($request->all(), [
@@ -120,6 +149,7 @@ class RegisterController extends Controller
             'password' => 'required|string|min:8|max:34',
         ]);
     }
+
     /**
      * LogIn .
      *
