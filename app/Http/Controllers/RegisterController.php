@@ -21,28 +21,6 @@ class RegisterController extends Controller
         ]);
     }
 
-    public function getIPInfo($ipAddress)
-    {
-        $apiKey = 'lH2nuxQOrwSAj+O+ulDjJg==bDSrfkObt70jmymU';
-        $apiUrl = "https://api.api-ninjas.com/v1/iplookup?address={$ipAddress}";
-
-        $response = Http::withHeaders([
-            'X-Api-Key' => $apiKey,
-        ])->get($apiUrl);
-
-        if ($response->successful()) {
-            $ipInfo = $response->json();
-            return response()->json($ipInfo);
-        } else {
-            $error = [
-                'error' => true,
-                'message' => "Error: {$response->status()} {$response->body()}",
-            ];
-            return response()->json($error, $response->status());
-        }
-    }
-
-
 
     /**
      * Store a newly created resource in storage.

@@ -15,7 +15,7 @@ class SendEmailVerify implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $email;
-    public $tries = 3;
+    public $tries = 3; // so failad method will repeat three time
 
     /**
      * Create a new job instance.
@@ -43,7 +43,7 @@ class SendEmailVerify implements ShouldQueue
     public function failed(\Exception $exception)
     {
         info("Job failed: " . $exception->getMessage()); // this will store in storage/logs/laravel.log
-        $this->release(1);
+        $this->release(5);
 
     }
 }
