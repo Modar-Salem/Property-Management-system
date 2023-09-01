@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Estate\StoreEstateRequest;
+use App\Http\Requests\Estate\UpdatePostRequest;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\User;
@@ -12,137 +14,89 @@ use Illuminate\Support\Facades\Validator;
 class EstateController extends Controller
 {
 
-    private function ValidateStoreEstateRequest(Request $request)
-    {
-        return Validator::make($request->all(), [
-            'operation_type' => 'required',
-            'governorate'=>'required',
-            'description'=>'required',
-            'price'=>'required',
-            'space' => 'required' ,
-            'estate_type' => 'required' ,
-            'image' => 'mimes:jpeg,jpg,png,gif ',
-            'image1' => 'mimes:jpeg,jpg,png,gif' ,
-            'image2' => 'mimes:jpeg,jpg,png,gif'  ,
-            'image3' => 'mimes:jpeg,jpg,png,gif' ,
-            'image4' => 'mimes:jpeg,jpg,png,gif' ,
-            'image5' => 'mimes:jpeg,jpg,png,gif' ,
-            'image6' => 'mimes:jpeg,jpg,png,gif' ,
-            'image7' => 'mimes:jpeg,jpg,png,gif' ,
-            'image8' => 'mimes:jpeg,jpg,png,gif' ,
-            'image9' => 'mimes:jpeg,jpg,png,gif'
 
-        ]);
-    }
 
-    public function store_estate(Request $request)
+    public function store_estate(StoreEstateRequest $request)
     {
 
         try
         {
-            //Validate
-            try
+
+            $id = Auth::id();
+
+            $estate = \App\Models\Estate::create([
+                'owner_id'=> $id,
+                'operation_type' => $request['operation_type'],
+                'governorate'=> $request['governorate'],
+                'locationInDamascus'=> $request['locationInDamascus'],
+                'description'=> $request['description'],
+                'price'=> $request['price'],
+                'space' => $request['space'] ,
+                'estate_type' => $request['estate_type'] ,
+                'beds' => $request['beds'] ,
+                'level' => $request['level'] ,
+                'baths' => $request ['baths'] ,
+                'garage' => $request ['garage'] ,
+                'status' => $request ['status'] ,
+                'address' => $request['address']
+            ]) ;
+
+            $image= new ImageController() ;
+            if ($request->hasFile('image'))
             {
-                $validate = $this->ValidateStoreEstateRequest($request) ;
-                if ($validate->fails())
-                    return response()->json([
-                        'Status' => false,
-                        'Validation Error' => $validate->errors()
-                    ]);
+                $image->store_image_post($request->file('image') , $estate->id , 'estate') ;
             }
-            catch (\Exception $exception ) {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $exception->getMessage()
-                ]) ;
-            }
-            // create product
-            try
+
+            if ($request->hasFile('image1'))
             {
-
-                $id = Auth::id();
-
-                $estate = \App\Models\Estate::create([
-                    'owner_id'=> $id,
-                    'operation_type' => $request['operation_type'],
-                    'governorate'=> $request['governorate'],
-                    'locationInDamascus'=> $request['locationInDamascus'],
-                    'description'=> $request['description'],
-                    'price'=> $request['price'],
-                    'space' => $request['space'] ,
-                    'estate_type' => $request['estate_type'] ,
-                    'beds' => $request['beds'] ,
-                    'level' => $request['level'] ,
-                    'baths' => $request ['baths'] ,
-                    'garage' => $request ['garage'] ,
-                    'status' => $request ['status'] ,
-                    'address' => $request['address']
-                ]) ;
-
-                $image= new ImageController() ;
-                if ($request->hasFile('image'))
-                {
-                    $image->store_image_post($request->file('image') , $estate->id , 'estate') ;
-                }
-
-                if ($request->hasFile('image1'))
-                {
-                    $image->store_image_post($request->file('image1'), $estate->id , 'estate');
-                }
-
-                if ($request->hasFile('image2'))
-                {
-                    $image->store_image_post($request->file('image2'), $estate->id , 'estate');
-                }
-
-                if ($request->hasFile('image3'))
-                {
-                    $image->store_image_post($request->file('image3'), $estate->id , 'estate');
-                }
-                if ($request->hasFile('image4'))
-                {
-                    $image->store_image_post($request->file('image4') , $estate->id , 'estate') ;
-                }
-
-                if ($request->hasFile('image5'))
-                {
-                    $image->store_image_post($request->file('image5'), $estate->id , 'estate');
-                }
-
-                if ($request->hasFile('image6'))
-                {
-                    $image->store_image_post($request->file('image6'), $estate->id , 'estate');
-                }
-
-                if ($request->hasFile('image7'))
-                {
-                    $image->store_image_post($request->file('image7'), $estate->id , 'estate');
-                }
-                if ($request->hasFile('image8'))
-                {
-                    $image->store_image_post($request->file('image8'), $estate->id , 'estate');
-                }
-
-                if ($request->hasFile('image9'))
-                {
-                    $image->store_image_post($request->file('image9'), $estate->id , 'estate');
-                }
-
-
-                return response() ->json([
-                    'Status' => true ,
-                    'estate'=> $estate,
-                    'images' => $estate->images()->get()
-                ],201) ;
-
+                $image->store_image_post($request->file('image1'), $estate->id , 'estate');
             }
-            catch (\Exception $exception)
+
+            if ($request->hasFile('image2'))
             {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $exception->getMessage()
-                ]) ;
+                $image->store_image_post($request->file('image2'), $estate->id , 'estate');
             }
+
+            if ($request->hasFile('image3'))
+            {
+                $image->store_image_post($request->file('image3'), $estate->id , 'estate');
+            }
+            if ($request->hasFile('image4'))
+            {
+                $image->store_image_post($request->file('image4') , $estate->id , 'estate') ;
+            }
+
+            if ($request->hasFile('image5'))
+            {
+                $image->store_image_post($request->file('image5'), $estate->id , 'estate');
+            }
+
+            if ($request->hasFile('image6'))
+            {
+                $image->store_image_post($request->file('image6'), $estate->id , 'estate');
+            }
+
+            if ($request->hasFile('image7'))
+            {
+                $image->store_image_post($request->file('image7'), $estate->id , 'estate');
+            }
+            if ($request->hasFile('image8'))
+            {
+                $image->store_image_post($request->file('image8'), $estate->id , 'estate');
+            }
+
+            if ($request->hasFile('image9'))
+            {
+                $image->store_image_post($request->file('image9'), $estate->id , 'estate');
+            }
+
+
+            return response() ->json([
+                'Status' => true ,
+                'estate'=> $estate,
+                'images' => $estate->images()->get()
+            ],201) ;
+
 
         }
         catch (\Exception $exception)
@@ -154,6 +108,8 @@ class EstateController extends Controller
         }
 
     }
+
+
     public function Get_User_Estates($id)
     {
         try{
@@ -270,7 +226,8 @@ class EstateController extends Controller
         }
     }
 
-    public function update_post(Request $request)
+
+    public function update_post(UpdatePostRequest $request)
     {
         try{
             $user_id = Auth::id();

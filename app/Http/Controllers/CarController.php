@@ -12,44 +12,11 @@ class CarController extends Controller
 {
 
 
-    private function ValidateStoreCarRequest(Request $request)
-    {
-        return  Validator::make($request->all(), [
-
-            'operation_type' => 'required',
-            'transmission_type' =>'required',
-            'brand' => 'required',
-            'governorate'=>'required',
-            'description'=>'required',
-            'price'=>'required',
-            'kilometers' =>'required',
-            'year' => 'required' ,
-            'image' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image1' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image2' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image3' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image4' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image5' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image6' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image7' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image8' => 'mimes:jpeg,jpg,png,gif ' ,
-            'image9' => 'mimes:jpeg,jpg,png,gif '
-        ]);
-    }
-
     public function store_car(Request $request)
     {
 
         try
         {
-
-            $validate = $this->ValidateStoreCarRequest($request) ;
-
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
 
             // Store Car In Database
             $id = Auth::id();

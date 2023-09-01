@@ -2,29 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SearchFilter\FilterRequest;
+use App\Http\Requests\SearchFilter\SearchRequest;
 use App\Models\Car;
 use App\Models\Estate;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class Search_FilterController extends Controller
 {
 
-    public function Filter(Request $request)
+    public function Filter(FilterRequest $request)
     {
         try {
-            $validate = Validator::make($request->all(), [
-                'type' => 'required | in:estate,car',
-            ]);
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
 
             if ($request['type'] == 'estate') {
 
@@ -66,7 +55,7 @@ class Search_FilterController extends Controller
                     $PostControl = new EstateController() ;
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetEstateWithImages($post->get())
+                        'Posts' => $PostControl->GetEstateWithImages($post->paginate())
                     ], 201);
 
                 }
@@ -143,20 +132,10 @@ class Search_FilterController extends Controller
 
 
 
-    public function Search(Request $request)
+    public function Search(SearchRequest $request)
     {
         try
         {
-            $validate = Validator::make($request->all(), [
-                'type' => 'required | in:estate,car' ,
-                'description' => 'required'
-            ]);
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
-
             if ($request['type'] == 'car' )
             {
                 $posts = Car::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();

@@ -3,39 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Events\NewMessage;
+use App\Http\Requests\Chat\GetConversationRequest;
+use App\Http\Requests\Chat\SendMessageRequest;
 use App\Models\Chat;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use TheSeer\Tokenizer\Exception;
 
 class ChatController extends Controller
 {
-    public function ValidatesendMessage(Request $request)
-    {
-        return Validator::make($request->all() , [
-            'receiver_id' => 'required|exists:users,id',
-            'message' => 'required|string | max : 600',
-        ]);
-    }
+
     /**
      * Send a new chat message.
      *
      * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function sendMessage(Request $request)
+    public function sendMessage(SendMessageRequest $request)
     {
         try{
-            $validatedData = $this->ValidatesendMessage($request) ;
-            if($validatedData->fails())
-            {
-                return response()->json([
-                    'Error' => $validatedData->errors()
-                ]);
-            }
-
 
             $chat = Chat::create([
                 'sender_id' => Auth::id(),
@@ -58,27 +45,16 @@ class ChatController extends Controller
 
     }
 
-    public function ValidategetConversation($request)
-    {
-        return Validator::make($request->all() ,[
-            'receiver_id' => 'required|exists:users,id'
-        ]) ;
-    }
+
     /**
      * Retrieve chat messages between two users.
      *
      * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getConversation(Request $request)
+    public function getConversation(GetConversationRequest $request)
     {
-        $validatedData = $this->ValidategetConversation($request) ;
-        if($validatedData->fails())
-        {
-            return response()->json([
-                'Error' => $validatedData->errors()
-            ]);
-        }
+
         $sender_id = Auth::id();
 
         $chats = Chat::where(function ($query) use ($request, $sender_id) {

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Estate\MyPostRequest;
+use App\Http\Requests\Image\ImageRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -61,59 +63,44 @@ class ProfileController extends Controller
         }
     }
 
-    private function validateImageRequest(Request $request)
+
+
+
+    public function User_insert_image(ImageRequest $request)
     {
-        return Validator::make($request->all(), [
-            'image' => 'mimes:jpeg,jpg,png',
-        ]);
-    }
 
+        try
+        {
+            $user_id = Auth::id() ;
 
-    public function User_insert_image(Request $request)
-    {
-        $user_id = Auth::id() ;
+            $user= \App\Models\User::find($user_id)  ;
+            $Image = new ImageController() ;
 
-        $validateImage = $this->validateImageRequest($request);
+            if ($user['image']!=null)
+            {
+                $Image->delete_image_from_Storage($user['image']) ;
+            }
 
-        if ($validateImage->fails())
+            $path = $Image->store_image_User($request) ;
+
+            //create Object in Database
+            $user->update(['image' => URL::asset('storage/' . $path)]);
+
+            return response()->json([
+                    'Status' => true ,
+                    'Message' => 'Image are inserted Successfully' ,
+                ]) ;
+
+        } catch(\Exception $exception)
+        {
+
             return response()->json([
                 'Status' => false,
-                'Validation Error' => $validateImage->errors()
+                'Message' => $exception->getMessage()
             ]);
-
-
-        if ($request->hasFile('image')) {
-            try
-            {
-                $user= \App\Models\User::find($user_id)  ;
-                $Image = new ImageController() ;
-
-                if ($user['image']!=null)
-                {
-                    $Image->delete_image_from_Storage($user['image']) ;
-                }
-
-                $path = $Image->store_image_User($request) ;
-
-                //create Object in Database
-                $user->update(['image' => URL::asset('storage/' . $path)]);
-
-                return response()->json([
-                        'Status' => true ,
-                        'Message' => 'Image are inserted Successfully' ,
-                    ]) ;
-
-            } catch(\Exception $exception)
-            {
-
-                return response()->json([
-                    'Status' => false,
-                    'Message' => $exception->getMessage()
-                ]);
-            }
         }
-
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -226,7 +213,7 @@ class ProfileController extends Controller
 
 
 
-    private function GetEstateWithImages()
+    private function GetMyEstateWithImages()
     {
         $user = Auth::user() ;
 
@@ -249,7 +236,7 @@ class ProfileController extends Controller
         return $estatesWithImages ;
     }
 
-    private function GetCarWithImages()
+    private function GetMyCarWithImages()
     {
         $user = Auth::user();
 
@@ -270,23 +257,14 @@ class ProfileController extends Controller
         return $carsWithImages ;
     }
 
-    public function my_posts(Request $request)
+    public function my_posts(MyPostRequest $request)
     {
-        $validate = Validator::make($request->all(), [
-            'type'=> 'required'
-        ]);
-        if ($validate->fails())
-            return response()->json([
-                'Status' => false,
-                'Validation Error' => $validate->errors()
-            ]);
-
 
         if($request['type']=='estate')
         {
             return response() -> json([
                 'Status' => true ,
-                'Estates' => $this->GetEstateWithImages()
+                'Estates' => $this->GetMyEstateWithImages()
             ]);
         }
 
@@ -294,15 +272,15 @@ class ProfileController extends Controller
         {
                 return response() -> json([
                     'Status' => true ,
-                    'Cars' => $this->GetCarWithImages()
+                    'Cars' => $this->GetMyCarWithImages()
                 ]);
         }
         if($request['type'] == 'all')
         {
             return response() -> json([
                 'Status' => true ,
-                'Estates' => $this->GetEstateWithImages() ,
-                'Cars' => $this->GetCarWithImages()
+                'Estates' => $this->GetMyEstateWithImages() ,
+                'Cars' => $this->GetMyCarWithImages()
             ]);
 
         }else

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Rate\GetRateRequest;
+use App\Http\Requests\Rate\RateRequest;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\Rate;
@@ -17,25 +19,12 @@ class RateController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function Rate(Request $request)
+    public function Rate(RateRequest $request)
     {
         try
         {
-            $validate = Validator::make($request->all() ,
-                [
-                    'rate' => 'Required | min :1 | max :5 |integer ',
-                    'type' => 'required | in:car,estate'
-                ]) ;
-
-            if($validate->fails())
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $validate->errors()
-                ]) ;
-            }
-
             $user_id = Auth::id() ;
+
             if($request['type'] == 'estate')
             {
                 $estate = Estate::find($request['estate_id']) ;
@@ -90,33 +79,15 @@ class RateController extends Controller
 
     }
 
-    private function validate_Get_Rate_Request(Request $request)
-    {
-        return Validator::make($request->all() ,
-            [
-                'type' => 'Required | in:estate,car',
-                'estate_id' => 'exists:estates,id' ,
-                'car_id' => 'exists:cars,id'
-            ]) ;
-
-    }
 
     /**
      * give a rate to the product
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function Get_Rate(Request $request){
+    public function Get_Rate(GetRateRequest $request){
         try
         {
-            $validate = $this->validate_Get_Rate_Request($request) ;
-            if($validate->fails())
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $validate->errors()
-                ]) ;
-            }
 
             $sum = 0  ;
             $count = 0 ;

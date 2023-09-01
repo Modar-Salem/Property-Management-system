@@ -2,57 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Register\LogInRequest;
+use App\Http\Requests\Register\SignUpRequest;
 use App\Jobs\SendEmailVerify;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
 {
-    private function validateSignUpRequest(Request $request)
-    {
-        return Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|max:34',
-        ]);
-    }
 
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function SignUp(Request $request)
+    public function SignUp(SignUpRequest $request)
     {
 
         try {
-            //Validate $request
-            $validate = $this->validateSignUpRequest($request);
-            if ($validate->fails())
-            {
-                $error = $validate->errors() ;
-                if($error->has('email') && $error->get('email')[0] === "The email has already been taken.")
-                {
-                    $user_temp = User::where('email' , $request['email'])->first() ;
-                    if($user_temp->email_verified_at == null)
-                    {
-                        return response()->json([
-                            'Status' => false,
-                            'Validation Error' => 'email must be verified'
-                        ]);
-                    }
-                }
-                return response()->json([
-                    'Status' => false,
-                    'Validation Error' => $validate->errors()
-                ]);
-            }
+
             //store the user
             $User = \App\Models\User::create([
                 'name' => $request['name'],
@@ -72,36 +40,6 @@ class RegisterController extends Controller
 
             SendEmailVerify::dispatch($request['email']) ;
 
-            //store the image
-            if ($request->hasFile('image')) {
-                $image = new ImageController() ;
-
-                //validate image
-                $validateImage = $image->validateImageRequest($request);
-                if ($validateImage->fails())
-                    return response()->json([
-                        'Status' => false,
-                        'Validation Error' => $validate->errors()
-                    ]);
-
-                //store image in storage
-                $path = $image->store_image_User($request) ;
-
-                //store image in database
-                \App\Models\User::find($User['id'])
-                    ->update(
-                        ['image' => URL::asset('/storage/' . $path)]
-                    );
-
-
-                return response()->json([
-                        'Status' => true,
-                        'User' => $User,
-                        'Message' => 'Image are inserted Successfully',
-                ]);
-
-            }
-
             return response()->json([
                 'Status' => true,
                 'User' => $User,
@@ -119,32 +57,11 @@ class RegisterController extends Controller
 
 
 
-
-    private function validateLogInRequest(Request $request)
-    {
-        return Validator::make($request->all(), [
-            'email' => 'required|email |exists:users,email',
-            'password' => 'required|string|min:8|max:34',
-        ]);
-    }
-
-    /**
-     * LogIn .
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function LogIn(Request $request)
+    public function LogIn(LogInRequest $request)
     {
         try
         {
-            $validate = $this->validateLogInRequest($request) ;
-            if ($validate->fails())
-                return response()->json([
-                    'Status' => false ,
-                    'Validation Error' => $validate->errors()
-                ]) ;
-
+            //if the email is Google Email
             $user = User::where('email' , $request['email'])->get();
             if($user[0]->google_id != null)
                 return response()->json([
@@ -152,8 +69,8 @@ class RegisterController extends Controller
                     ,'Message'=>'You can access with this email only with Gmail'
                 ]);
 
+            //Normal Email
             $credentials = $request->only('email', 'password');
-
             if (!Auth::attempt($credentials))
                 return response()->json([
                     'Status' => false ,
@@ -163,8 +80,12 @@ class RegisterController extends Controller
             {
 
                 $User = \App\Models\User::where('email' , $request['email'])->first() ;
-                $token = $User->createToken('API TOKEN')->plainTextToken ;
+                if($User['email_verified_at'] == null)
+                    return response()->json([
+                        'Message' => 'This is Email Must Be verified'
+                    ])  ;
 
+                $token = $User->createToken('API TOKEN')->plainTextToken ;
                 return response() ->json([
                     'Status'=> true ,
                     'User' => $User,

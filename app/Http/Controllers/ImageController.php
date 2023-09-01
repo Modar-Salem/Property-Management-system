@@ -10,13 +10,6 @@ use Illuminate\Support\Facades\Validator;
 class ImageController extends Controller
 {
 
-    public function validateImageRequest(Request $request)
-    {
-        return Validator::make($request->all(), [
-            'image' => 'mimes:jpeg,jpg,png',
-        ]);
-    }
-
     public function store_image_User(Request $request)
     {
 

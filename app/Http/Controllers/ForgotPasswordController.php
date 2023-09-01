@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ForgotPassword\EmailForgotPasswordRequest;
+use App\Http\Requests\ForgotPassword\EmailResetPasswordRequest;
+use App\Http\Requests\ForgotPassword\UserCheckCodeForgotPasswordRequest;
 use App\Mail\SendCodeResetPassword;
 use App\Models\ResetCodePassword;
 use App\Models\User;
@@ -13,24 +16,18 @@ class ForgotPasswordController extends Controller
 {
 
 
-    public function userForgotPassword(Request $request){
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'exists:users,email'],
-        ]);
+    public function userForgotPassword(EmailForgotPasswordRequest $request){
 
-        if ($validator->fails()) {
-            return response()->json([
-                'Status'=>false,
-                'ErrorMessage'=>$validator->errors()]);
-        }
-
-        $data = $validator->validated();
         //Delete all old code that user send before
         ResetCodePassword::query()->where('email',$request['email'])->delete();
         //Generate random code
         $data['code']=mt_rand(100000,999999);
+
         //Create a new code
-        $CodeData=ResetCodePassword::query()->create($data);
+        $CodeData=ResetCodePassword::create([
+            'code' => $data['code'] ,
+            'email' => $request['email']
+        ]);
         //Send email to user
         Mail::to($request['email'])->send(new SendCodeResetPassword($CodeData['code']));
 
@@ -39,18 +36,9 @@ class ForgotPasswordController extends Controller
             'Message'=>trans('code.sent')
         ]);
     }
-    public function userCheckCode(Request $request){
 
-        $validator = Validator::make($request->all(), [
-            'code' =>'required|string|exists:reset_code_passwords,code',
-        ]);
-        if ($validator->fails()) {
-            return response()->json([
-                'Status'=>false,
-                'ErrorMessage'=>$validator->errors()]);
-        }
-
-        $validator->validated();
+    public function userCheckCode(UserCheckCodeForgotPasswordRequest $request)
+    {
         //find the code
         $PasswordReset=ResetCodePassword::query()->firstWhere('code',$request['code']);
         //check if it is not expired:the time is one hour
@@ -66,20 +54,10 @@ class ForgotPasswordController extends Controller
             'Message' => trans('password.code_is_valid')
         ]);
     }
-    public function userResetPassword(Request $request){
 
-        $validator = Validator::make($request->all(), [
-            'code' => 'required|string|exists:reset_code_passwords,code',
-            'password' => ['required','confirmed']
-        ]);
+    public function userResetPassword(EmailResetPasswordRequest $request){
 
-        if ($validator->fails()) {
-            return response()->json([
-                'Status'=>false,
-                'ErrorMessage'=>$validator->errors()]);
-        }
-
-        $input = $validator->validated();
+        $input = $request->all();
         //find the code
         $PasswordReset=ResetCodePassword::query()->firstWhere('code',$request['code']);
         //check if it is not expired:the time is one hour
@@ -99,4 +77,5 @@ class ForgotPasswordController extends Controller
             'Status'=>true,
             'Message' => 'password has been successfully reset']);
     }
+
 }

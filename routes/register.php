@@ -24,7 +24,7 @@ Route::get('LogOut' , [\App\Http\Controllers\RegisterController::class , 'LogOut
 //Verify Email
 Route::post('check_code_email_verify' , [\App\Http\Controllers\VerifyController::class , 'check_code_email_verify']) ;
 
-Route::post('send_code' , [\App\Http\Controllers\VerifyController::class , 'sendEmailVerificationCode']) ;
+Route::post('send_code' , [\App\Http\Controllers\VerifyController::class , 'ResendEmailVerificationCode']) ;
 
 
 //Forgot Password

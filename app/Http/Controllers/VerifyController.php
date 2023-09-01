@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Verify\CheckCodeEmailVerifyRequest;
+use App\Http\Requests\Verify\SendEmailVerificationCodeRequest;
 use App\Models\User;
 use App\Models\verify_email;
 use http\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Validator;
-use function Ramsey\Collection\remove;
 
 class VerifyController extends Controller
 {
@@ -16,15 +16,6 @@ class VerifyController extends Controller
     //Send The verification code
     public function sendEmailVerificationCode(Request $request)
     {
-        //validate request
-        $validate = Validator::make($request->all(), [
-            'email' => 'required | email  |exists:users,email',
-        ]);
-        if ($validate->fails())
-            return response()->json([
-                'Status' => false,
-                'Validation Error' => $validate->errors()
-            ]);
         verify_email::where('email' , $request['email'])->delete() ;
         //generate code
         $code = mt_rand(100000, 999999);
@@ -43,7 +34,7 @@ class VerifyController extends Controller
     }
 
     //Send The verification code
-    public function sendEmailVerificationCodePublic(Request $request)
+    public function ResendEmailVerificationCode(SendEmailVerificationCodeRequest $request)
     {
         try
         {
@@ -59,21 +50,10 @@ class VerifyController extends Controller
     }
 
     //check if the sent code is true
-    public function check_code_email_verify(Request $request)
+    public function check_code_email_verify(CheckCodeEmailVerifyRequest $request)
     {
 
         try{
-            $validator = Validator::make($request->all(), [
-                'email' => 'required |email |exists:users,email',
-                'code' => 'required|string|exists:verify,code'
-            ]);
-
-            if ($validator->fails()){
-                return response()->json([
-                    'Status' => false,
-                    'ErrorMessage' => $validator->errors()]);
-            }
-
             //find the code
             $Code = verify_email::where('code', $request['code'])->first();
 
@@ -123,7 +103,6 @@ class VerifyController extends Controller
         }
     }
 
-
     //SMS  verification
     public function sendSmsVerificationCode(Request $request)
     {
@@ -156,4 +135,5 @@ class VerifyController extends Controller
             ]);
         }
     }
+
 }

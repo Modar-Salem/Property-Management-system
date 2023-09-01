@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\LikeEvent;
+use App\Http\Requests\Favorite\AddFavoriteRequest;
+use App\Http\Requests\Favorite\LikesNumberRequest;
+use App\Http\Requests\Favorite\MyFavoriteRequest;
 use App\Models\Car;
 use App\Models\Estate;
 use App\Models\Favorite;
@@ -36,7 +39,6 @@ class FavoriteController extends Controller
         return $postsWithImages;
 
     }
-
     private function Get_Favorite_Car()
     {
         $user = Auth::user() ;
@@ -60,24 +62,10 @@ class FavoriteController extends Controller
         return $postsWithImages ;
     }
 
-
-
-    public function Get_All_Favorite(Request $request)
+    public function Get_All_Favorite(MyFavoriteRequest $request)
     {
         try
         {
-            $validate = Validator::make($request->all() ,
-                [
-                    'type' => 'Required |  in:estate,car,all',
-                ]) ;
-
-            if($validate->fails())
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $validate->errors()
-                ]) ;
-            }
 
             if($request['type'] == 'estate')
             {
@@ -106,30 +94,14 @@ class FavoriteController extends Controller
             ]) ;
         }
     }
+    //
 
 
-
-    /**
-     * Add the specified resource to favorite.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function Add_To_Favorite(Request $request)
+    public function Add_To_Favorite(AddFavoriteRequest $request)
     {
         try
         {
-            $validate = Validator::make($request->all() ,
-                [
-                    'type' => 'Required |  in:estate,car,all',
-                ]) ;
 
-            if($validate->fails())
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $validate->errors()
-                ]) ;
-            }
             $car = null ;
             $estate= null ;
 
@@ -205,8 +177,7 @@ class FavoriteController extends Controller
     }
 
 
-
-
+    //
     private function Car_Likes_Number(Request $request)
     {
 
@@ -242,22 +213,11 @@ class FavoriteController extends Controller
                 ]) ;
         }
     }
-    public function Likes_number(Request $request)
+
+    public function Likes_number(LikesNumberRequest $request)
     {
         try
         {
-            $validate = Validator::make($request->all() ,
-                [
-                    'type' => 'Required |  in:estate,car',
-                ]) ;
-
-            if($validate->fails())
-            {
-                return response()->json([
-                    'Status' => false ,
-                    'Message' => $validate->errors()
-                ]) ;
-            }
             if($request['type'] == 'car')
             {
                 return $this->Car_Likes_Number($request) ;
