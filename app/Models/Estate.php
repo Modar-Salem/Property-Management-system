@@ -30,6 +30,10 @@ class Estate extends Model
         'garage'
     ];
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class, 'estate_id');
+    }
 
     public function images(): HasMany
     {

@@ -11,55 +11,42 @@ use App\Models\Estate;
 use App\Models\Favorite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 
 class FavoriteController extends Controller
 {
+//    public function  __construct(ValidationFactory $validationFactory  , FavoriteService $favoriteService)
+//    {
+//            parent::__construct($validationFactory ,$favoriteService )  ;
+//    }
 
     private function Get_Favorite_Estate()
     {
 
-        $user = Auth::user() ;
+        $user = Auth::user();
 
-        $Estates = Estate::join('favorites', 'estates.id', '=', 'favorites.estate_id')
-        ->where('favorites.user_id', '=', $user->id)
-        ->get();
-        $postsWithImages = [];
+        $Estates = Estate::whereHas('favorites', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })
+            ->with(['images'])
+            ->get();
 
-        foreach ($Estates as $estate) {
-            $images = $estate->images()->get();
-            $postWithImage = [
-                'post' => $estate,
-                'images' => $images,
-                'favorite' => true
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
 
-        return $postsWithImages;
+        return $Estates;
 
     }
     private function Get_Favorite_Car()
     {
         $user = Auth::user() ;
 
-        $Car = Car::join('favorites', 'cars.id', '=', 'favorites.car_id')
-            ->where('favorites.user_id', '=', $user->id)
-            ->get();
+        $Car = Car::whereHas('favorites' , function ($query) use ($user){
+          $query->where('user_id', $user->id);
+        })
+        ->with('images')
+        ->get();
 
-        $postsWithImages = [];
 
-        foreach ($Car as $car) {
-            $images = $car->images()->get();
-            $postWithImage = [
-                'post' => $car,
-                'images' => $images,
-                'favorite' => true
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
 
-        return $postsWithImages ;
+        return $Car ;
     }
 
     public function Get_All_Favorite(MyFavoriteRequest $request)

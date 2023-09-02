@@ -32,6 +32,11 @@ class Car extends Model
         'driving_force'
     ];
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class, 'car_id');
+    }
+
     public function images() : HasMany
     {
         return $this->hasMany(\App\Models\Image::class , 'car_id') ;

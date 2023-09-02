@@ -113,11 +113,18 @@ class EstateController extends Controller
     public function Get_User_Estates($id)
     {
         try{
-            $owner = User::find($id);
 
-            if ($owner) {
+            $user = Auth::user() ;
+            $owner_posts = User::with(['estates.images'])
+                ->find($id);
+
+            // Process the retrieved data to add the 'is_favorite' field to each estate
+            $owner_posts->estates->each(function ($estate) use ($user) {
+                $estate->is_favorite = $user->isEstateFavorite($estate);
+            });
+            if ($owner_posts) {
                 return response()->json([
-                    'posts' => $this->GetEstateWithImages($owner->estates()->get())
+                    'posts' => $owner_posts
                 ]);
             }else
             {
@@ -139,23 +146,20 @@ class EstateController extends Controller
         try
         {
             $user = Auth::user();
-            $estate = Estate::find($estate_id);
+            $estate = Estate::with(['images', 'owner'])->find($estate_id);
+
             if ($estate) {
                 $favorite = $user->isEstateFavorite($estate);
-                $estateimage = $estate->images()->get() ;
-                $estateowner = $estate->owner()->get() ;
 
                 return response()->json([
                     'Status' => true,
                     'Estate' => $estate,
-                    'images' => $estateimage,
-                    'owner' => $estateowner[0],
-                    'favorite' => $favorite
+                    'favorite' => $favorite,
                 ]);
             } else {
                 return response()->json([
                     'Status' => false,
-                    'Estate' => "Estate does not exist"
+                    'Estate' => "Estate does not exist",
                 ]);
             }
         }catch (\Exception $exception)
@@ -169,24 +173,6 @@ class EstateController extends Controller
     }
 
 
-
-    public function GetEstateWithImages($posts)
-    {
-        $user = Auth::user();
-
-        $postsWithImages = [];
-        foreach ($posts as $estate) {
-            $images = $estate->images()->get();
-            $favorite = $user->isEstateFavorite($estate);
-            $postWithImage = [
-                'post' => $estate,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
-        return $postsWithImages;
-    }
 
 
     public function remove_estate_post($post_id)

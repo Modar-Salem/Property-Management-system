@@ -7,6 +7,7 @@ use App\Http\Requests\SearchFilter\SearchRequest;
 use App\Models\Car;
 use App\Models\Estate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class Search_FilterController extends Controller
 {
@@ -14,7 +15,7 @@ class Search_FilterController extends Controller
     public function Filter(FilterRequest $request)
     {
         try {
-
+            $user = Auth::user() ;
             if ($request['type'] == 'estate') {
 
                 $post = Estate::query() ;
@@ -52,10 +53,16 @@ class Search_FilterController extends Controller
                     $post = $post->where('status', $request['status']);
 
                 if ($post) {
-                    $PostControl = new EstateController() ;
+                    $estates = $post->get() ;
+                    $post = $estates->load('images' , 'owner') ;
+
+                    $post->each(function ($estate) use ($user) {
+                        $estate->is_favorite = $user->isEstateFavorite($estate);
+                    });
+
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetEstateWithImages($post->paginate())
+                        'Posts' => $post
                     ], 201);
 
                 }
@@ -111,10 +118,16 @@ class Search_FilterController extends Controller
                     $post = $post->where('kilometers', '<', $request['max_kilometers']);
 
                 if ($post) {
-                    $PostControl = new CarController() ;
+                    $cars = $post->get() ;
+                    $post = $cars->load('images' , 'owner') ;
+
+                    $post->each(function ($car) use ($user) {
+                        $car->is_favorite = $user->isCarFavorite($car);
+                    });
+
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetCarsWithImages($post->get())
+                        'Posts' => $post
                     ], 201);
 
                 }
@@ -136,27 +149,35 @@ class Search_FilterController extends Controller
     {
         try
         {
+            $user= Auth::user() ;
             if ($request['type'] == 'car' )
             {
-                $posts = Car::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                $posts = Car::with('images' , 'owner')->where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts)
                 {
-                    $PostControl = new CarController() ;
+
+                    $posts->each(function ($car) use ($user) {
+                        $car->is_favorite = $user->isCarFavorite($car);
+                    });
+
                     return response()->json([
                         'Status' => true,
-                        'Posts' => $PostControl->GetCarsWithImages($posts)
+                        'Posts' => $posts
                     ], 201);
                 }
             }
             if ($request['type'] == 'estate' )
             {
-                $posts = Estate::where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                $posts = Estate::with('images' , 'owner')->where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts)
                 {
-                    $PostControl = new EstateController() ;
+                    $posts->each(function ($estate) use ($user) {
+                        $estate->is_favorite = $user->isEstateFavorite($estate);
+                    });
+
                     return response()->json([
                         'Status'=>true ,
-                        'Posts'=> $PostControl->GetEstateWithImages($posts)
+                        'Posts'=> $posts
                     ],201) ;
                 }
             }

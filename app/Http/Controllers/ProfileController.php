@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Estate\MyPostRequest;
+use App\Http\Requests\ForgotPassword\ResetPasswordRequest;
 use App\Http\Requests\Image\ImageRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -38,8 +39,6 @@ class ProfileController extends Controller
     }
 
 
-
-
     public function GetUser($id)
     {
         try {
@@ -62,8 +61,6 @@ class ProfileController extends Controller
             ] ) ;
         }
     }
-
-
 
 
     public function User_insert_image(ImageRequest $request)
@@ -183,22 +180,8 @@ class ProfileController extends Controller
     }
 
 
-    private function ValidateResetPasswordRequest(Request $request)
+    public function resetPassword(ResetPasswordRequest $request)
     {
-        return Validator::make($request->all(), [
-            'old_password' => 'required | string | min : 8 | max:34 ' ,
-            'new_password' => 'required | string | min : 8 | max:34 '
-        ]);
-    }
-    public function resetPassword(Request $request)
-    {
-
-        $validate = $this->ValidateResetPasswordRequest($request) ;
-        if ($validate->fails())
-            return response()->json([
-                'Status' => false,
-                'Validation Error' => $validate->errors()
-            ]);
 
         $user = Auth::user();
 
@@ -211,76 +194,52 @@ class ProfileController extends Controller
         return response()->json(['message' => 'Password has been updated.']);
     }
 
-
-
-    private function GetMyEstateWithImages()
+    private function my_estate_posts(User $user)
     {
-        $user = Auth::user() ;
-
-        $estatesWithImages = collect();
-
-        foreach ($user->estates as $estate)
-        {
-            $images = $estate->images()->get();
-
-            $favorite = $user->isEstateFavorite($estate);
-
-            $postWithImage = [
-                'post' => $estate,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            $estatesWithImages->push($postWithImage);
-
-        }
-        return $estatesWithImages ;
+        $posts = User::with('estates.images')->find(Auth::id()) ;
+        // Process the retrieved data to add the 'is_favorite' field to each estate
+        $posts->estates->each(function ($estate) use ($user) {
+            $estate->is_favorite = $user->isEstateFavorite($estate);
+        });
+        return $posts ;
     }
 
-    private function GetMyCarWithImages()
+    private function my_car_posts(User $user)
     {
-        $user = Auth::user();
-
-        $carsWithImages = collect();
-
-
-        foreach ($user->cars as $cars) {
-
-            $images = $cars->images()->get();
-            $favorite = $user->isCarFavorite($cars);
-            $postWithImage = [
-                'post' => $cars,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            $carsWithImages->push($postWithImage);
-        }
-        return $carsWithImages ;
+        $posts = User::with('cars.images')->find(Auth::id()) ;
+        // Process the retrieved data to add the 'is_favorite' field to each estate
+        $posts->cars->each(function ($car) use ($user) {
+            $car->is_favorite = $user->isCarFavorite($car);
+        });
+        return $posts ;
     }
 
     public function my_posts(MyPostRequest $request)
     {
+        $user= User::find(Auth::id()) ;
 
         if($request['type']=='estate')
         {
             return response() -> json([
                 'Status' => true ,
-                'Estates' => $this->GetMyEstateWithImages()
+                'Estates' => $this->my_estate_posts($user)
             ]);
         }
 
         if($request['type']=='car')
         {
+
                 return response() -> json([
                     'Status' => true ,
-                    'Cars' => $this->GetMyCarWithImages()
+                    'Cars' => $this->my_car_posts($user)
                 ]);
         }
         if($request['type'] == 'all')
         {
             return response() -> json([
                 'Status' => true ,
-                'Estates' => $this->GetMyEstateWithImages() ,
-                'Cars' => $this->GetMyCarWithImages()
+                'Estates' => $this->my_estate_posts($user) ,
+                'Cars' => $this->my_car_posts($user)
             ]);
 
         }else

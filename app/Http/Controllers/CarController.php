@@ -111,36 +111,22 @@ class CarController extends Controller
     }
 
 
-    public function GetCarsWithImages($posts)
-    {
-        $user = Auth::user();
-
-        $postsWithImages = [];
-
-        foreach ($posts as $car) {
-            $images = $car->images()->get();
-            $favorite = $user->isCarFavorite($car);
-            $postWithImage = [
-                'post' => $car,
-                'images' => $images,
-                'favorite' => $favorite
-            ];
-            array_push($postsWithImages, $postWithImage);
-        }
-        return $postsWithImages;
-
-    }
 
     public function Get_User_Cars($id)
     {
         try
         {
-            $owner = User::find($id);
+            $user = Auth::user() ;
+            $owner_cars = User::with(['cars.images'])->find($id);
 
-            if ($owner)
+            if ($owner_cars)
             {
+                // Process the retrieved data to add the 'is_favorite' field to each car
+                $owner_cars->cars->each(function ($car) use ($user) {
+                    $car->is_favorite = $user->isCarFavorite($car);
+                });
                 return response()->json([
-                    'posts' => $this->GetCarsWithImages($owner->cars()->get())
+                    'posts' => $owner_cars
                 ]);
             }else {
                 return response()->json([
@@ -160,19 +146,16 @@ class CarController extends Controller
     public function get_car($car_id)
     {
         try{
-            $user = Auth::user();
-            $car = Car::find($car_id);
+            $user = Auth::user() ;
+            $car = Car::with(['images' , 'owner'])
+                ->find($car_id);
             if ($car)
             {
-                $car_image = $car->images()->get() ;
-                $car_owner = $car->owner()->get() ;
-                $favorite = $user->isCarFavorite($car);
+
+                $car->isFavorite = $user->isCarFavorite($car);
                 return \response()->json([
                     'Status' => true,
                     'Car : ' => $car,
-                    'images : ' => $car_image,
-                    'Owner : ' => $car_owner[0],
-                    'favorite' => $favorite
                 ]);
             }else {
                 return \response()->json([
