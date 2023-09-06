@@ -25,80 +25,24 @@ class HomeController extends Controller
     {
         try
         {
-            $postsWithImages =collect() ;
-            $user_id = Auth::id();
             $user = Auth::user() ;
-            $favorites_location = DB::table('favorites')
-                ->join('estates', 'favorites.estate_id', '=', 'estates.id')
-                ->where('favorites.user_id', '=', $user_id)
-                ->select('estates.governorate')
-                ->get()->unique() ;
 
+            // Get the user's favorite estates with unique governorates
+            $uniqueGovernorates = $user->favoriteEstates()->select('governorate')->distinct()->pluck('governorate');
 
-            $existingPostIds = []; // Track existing post IDs
+            // Get the favorite estates within those unique governorates
+            $favoriteEstates = Estate::whereIn('governorate', $uniqueGovernorates)->get();
 
-            foreach ($favorites_location as $favorite) {
-                $posts = Estate::where('governorate', $favorite->governorate)->get();
-                foreach ($posts as $post) {
-                    $existingPostIds[] = $post->id; // Add post ID to existing post IDs
-                    $images = $post->images()->get();
-                    $favorite = $user->isEstateFavorite($post) ;
-                    $postWithImage = [
-                        'post' => $post,
-                        'images' => $images ,
-                        'favorite' => $favorite
-                    ];
-                    $postsWithImages->push($postWithImage);
-                }
-            }
-
-            $Top_Rating_Posts = DB::table('rates')
-                ->join('estates', 'rates.estate_id', '=', 'estates.id')
-                ->where('rates.property_type', '=', 'estate')
-                ->select('estate_id', DB::raw('AVG(rate) as average_rate'))
-                ->groupBy('estate_id')
+            $topRatedEstates = Estate::leftJoin(DB::raw('(SELECT estate_id, AVG(rate) as average_rate FROM rates WHERE property_type = "estate" GROUP BY estate_id) as average_rates'), 'estates.id', '=', 'average_rates.estate_id')
                 ->orderByDesc('average_rate')
                 ->get();
+            // Merge and deduplicate estates
+            $estates = $favoriteEstates->concat($topRatedEstates)->unique();
 
-
-            foreach ($Top_Rating_Posts as $rating)
-            {
-                $estate = Estate::find($rating->estate_id);
-
-                if (!in_array($estate->id, $existingPostIds))
-                {
-                    $existingPostIds[] = $estate->id; // Add post ID to existing post IDs
-                    $images = $estate->images()->get();
-                    $favorite = $user->isEstateFavorite($estate) ;
-                    $postWithImage = [
-                        'post' => $estate,
-                        'images' => $images,
-                        'favorite' => $favorite
-                    ];
-                    $postsWithImages->push($postWithImage);
-                }
-            }
-
-            $All_Estate = Estate::all();
-
-            foreach ($All_Estate as $estate)
-            {
-                if (!in_array($estate->id, $existingPostIds))
-                {
-                    $images = $estate->images()->get();
-                    $favorite = $user->isEstateFavorite($estate);
-                    $postWithImage = [
-                        'post' => $estate,
-                        'images' => $images,
-                        'favorite' => $favorite
-                    ];
-                    $postsWithImages->push($postWithImage);
-                }
-            }
 
             $perPage = 4;
             $currentPage = Paginator::resolveCurrentPage() ?: 1;
-            $items = $postsWithImages->all();
+            $items = $estates->all();
             $currentItems = array_slice($items, ($currentPage - 1) * $perPage, $perPage);
             $relatedPosts = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
 
@@ -116,88 +60,40 @@ class HomeController extends Controller
 
     public function Car_Home()
     {
-        try {
-                $user_id = Auth::id();
+        try
+        {
                 $user= Auth::user() ;
-                $favorites_location = DB::table('favorites')
-                    ->join('cars', 'favorites.car_id', '=', 'cars.id')
-                    ->where('favorites.user_id', '=', $user_id)
-                    ->select('cars.governorate')
-                    ->get()->unique();
 
-                $postsWithImages = collect();
-                $existingPostIds = [];
+                // Get the user's favorite estates with unique brands
+                $uniqueBrands = $user->favoriteCar()->select('brand')->distinct()->pluck('brand');
 
-                    foreach ($favorites_location as $favorite) {
-                    $posts = Car::where('governorate', $favorite->governorate)->get();
-                    foreach ($posts as $post) {
-                        $existingPostIds[] = $post->id; // Add post ID to existing post IDs
-                        $images = $post->images()->get();
-                        $favorite = $user->isCarFavorite($post) ;
-                        $postWithImage = [
-                            'post' => $post,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        $postsWithImages->push($postWithImage);
-                    }
-                }
+                $favoriteCar = Car::whereIn('brand', $uniqueBrands)->get();
 
-                $Top_Rating_Posts = DB::table('rates')
-                    ->join('cars', 'rates.car_id', '=', 'cars.id')
-                    ->where('rates.property_type', '=', 'car')
-                    ->select('car_id', DB::raw('AVG(rate) as average_rate'))
-                    ->groupBy('car_id')
-                    ->orderByDesc('average_rate')
-                    ->get();
+                $topRatedCars = Car::leftJoin(DB::raw('(SELECT car_id, AVG(rate) as average_rate FROM rates WHERE property_type = "car" GROUP BY car_id) as average_rates'), 'cars.id', '=', 'average_rates.car_id')
+                ->orderByDesc('average_rate')
+                ->get();
 
-                foreach ($Top_Rating_Posts as $rating) {
-                    $car = Car::find($rating->car_id);
-                    if (!in_array($car->id, $existingPostIds)) {
-                        $existingPostIds[] = $car->id; // Add post ID to existing post IDs
-                        $images = $car->images()->get();
-                        $favorite = $user->isCarFavorite($car);
-                        $postWithImage = [
-                            'post' => $car,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        $postsWithImages->push($postWithImage);
-                    }
-                }
+                // Merge and deduplicate estates
+                $cars = $topRatedCars->concat($favoriteCar)->unique();
 
-                $All_Car = Car::all();
-
-                foreach ($All_Car as $car) {
-                    if (!in_array($car->id, $existingPostIds))
-                    {
-                        $images = $car->images()->get();
-                        $favorite = $user->isCarFavorite($car);
-                        $postWithImage = [
-                            'post' => $car,
-                            'images' => $images,
-                            'favorite' => $favorite
-                        ];
-                        $postsWithImages->push($postWithImage);
-
-                    }
-                }
                 $perPage = 4;
                 $currentPage = Paginator::resolveCurrentPage() ?: 1;
-                $items = $postsWithImages->all();
+                $items = $cars->all();
                 $currentItems = array_slice($items, ($currentPage - 1) * $perPage, $perPage);
-                $postsWithImages = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
+                $relatedPosts = new LengthAwarePaginator($currentItems, count($items), $perPage, $currentPage);
 
                 return response()->json([
-                    'All_Post' => $postsWithImages
+                    'AllPost' => $relatedPosts
                 ]);
 
-            } catch (\Exception $exception) {
-                return response()->json([
-                    'Status' => false,
-                    'Error Message' => $exception->getMessage(),
-                ]);
-            }
+
+        }catch (\Exception $exception) {
+            return response()->json([
+                'Status' => false,
+                'Error Message' => $exception->getMessage(),
+            ]);
+        }
+
     }
 
 }

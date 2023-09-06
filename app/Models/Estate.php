@@ -44,6 +44,12 @@ class Estate extends Model
     {
         return $this->belongsTo(User::class) ;
     }
+
+    public function rates(): HasMany
+    {
+        return $this->hasMany(Rate::class, 'estate_id');
+    }
+
     public function delete()
     {
         // delete images
@@ -56,6 +62,8 @@ class Estate extends Model
         // delete the estate
         parent::delete();
     }
+
+
 
     public function generateFakeData()
     {

@@ -45,6 +45,11 @@ class Car extends Model
     {
         return $this->belongsTo(User::class) ;
     }
+    public function rates(): HasMany
+    {
+        return $this->hasMany(Rate::class, 'car_id');
+    }
+
 
     public function delete()
     {

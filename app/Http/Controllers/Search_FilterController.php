@@ -152,7 +152,8 @@ class Search_FilterController extends Controller
             $user= Auth::user() ;
             if ($request['type'] == 'car' )
             {
-                $posts = Car::with('images' , 'owner')->where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
+                $posts = Car::with('images' , 'owner')
+                    ->where('description', 'like', '%' . $request['description'] . '%')->orWhere('address', 'like', '%' . $request['description'] . '%')->get();
                 if ($posts)
                 {
 

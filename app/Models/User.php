@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Faker\Factory as Faker;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -100,6 +100,16 @@ class User extends Authenticatable
 
     }
 
+    public function favoriteEstates(): BelongsToMany
+    {
+        return $this->belongsToMany(Estate::class, 'favorites', 'user_id', 'estate_id');
+    }
+
+    public function favoriteCar(): BelongsToMany
+    {
+        return $this->belongsToMany(Car::class, 'favorites', 'user_id', 'car_id');
+    }
+
     public function updatePassword($newPassword)
     {
         $this->password = Hash::make($newPassword);
@@ -129,5 +139,6 @@ class User extends Authenticatable
         $this->twitter_URL = $faker->url;
 
     }
+
 
 }
